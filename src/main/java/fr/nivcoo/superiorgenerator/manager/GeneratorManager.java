@@ -2,6 +2,7 @@ package fr.nivcoo.superiorgenerator.manager;
 
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.utilsz.config.Config;
+import org.bukkit.Bukkit;
 import org.bukkit.Material;
 
 import java.util.*;
@@ -36,7 +37,15 @@ public class GeneratorManager {
             HashMap<Material, Double> blocks = new HashMap<>();
             for (String blockString : blocksString) {
                 String[] split = blockString.split(":");
-                blocks.put(Material.valueOf(split[0]), Double.valueOf(split[1]));
+                Material material;
+                try {
+                    material = Material.valueOf(split[0]);
+                } catch (IllegalArgumentException e) {
+                    Bukkit.getLogger().warning("[SuperiorGenerator] The material : " + split[0] + " doesn't exist, please check your config !");
+                    material = Material.COBBLESTONE;
+                }
+
+                blocks.put(material, Double.valueOf(split[1]));
             }
 
             generatorsList.add(new Generator(ID, blocks));
