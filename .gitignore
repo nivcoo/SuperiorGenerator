@@ -1,0 +1,14 @@
+.classpath
+.project
+.settings/
+/bin/
+
+# Ignore intellij files
+.idea
+*.iml
+
+dependency-reduced-pom.xml
+
+# Ignore output generated files
+target
+out

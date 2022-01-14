@@ -1,0 +1,18 @@
+name: SuperiorGenerator
+version: 1.0.0
+api-version: 1.13
+author: nivcoo
+main: fr.nivcoo.superiorgenerator.SuperiorGenerator
+commands:
+  generator:
+    description: Generator Command
+permissions:
+  superiorgenerator.commands:
+    default: op
+    description: command
+  superiorgenerator.command.unlock:
+    default: op
+    description: unlock generator for island
+  superiorgenerator.command.select:
+    default: op
+    description: select generator for island
