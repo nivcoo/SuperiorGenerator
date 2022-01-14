@@ -7,16 +7,18 @@ messages:
       - "{!chatreactions.command.unlock}&6/generator unlock &eDébloquer un générateur !"
       - "{!chatreactions.command.select}&6/generator select &eSélectionner un générateur !"
       - "&7&m----------------------------------------------"
-
     unlock:
       success: "&7[&c&lES&7] &aLe générateur &b{0} &aa été débloqué pour &b{1} &a!"
       not_found: "&7[&c&lES&7] &cLe générateur {0} n'a pas été trouvé !"
       not_found_player: "&7[&c&lES&7] &cLe joueur {0} n'a pas été trouvé !"
       already_unlock: "&7[&c&lES&7] &cLe générateur {0} est déjà débloqué pour {1} !"
+      no_island: "&7[&c&lES&7] &cLe joueur &b{0} &cn'a pas d'île !"
     select:
       success: "&7[&c&lES&7] Le générateur a été changé avec succès !"
       already_selected: "&7[&c&lES&7] &cLe générateur séléctionné est déjà celui mis en place !"
       not_unlocked: "&7[&c&lES&7] &cLe générateur n'est pas débloqué !"
+      no_permission: "&7[&c&lES&7] &cVous ne pouvez pas améliorer votre générateur !"
+      no_island: "&7[&c&lES&7] &cVous n'avez pas d'île !"
 enable_basalt_generator: false
 generators:
   # do not delete the default one

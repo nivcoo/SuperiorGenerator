@@ -1,4 +1,4 @@
-package fr.nivcoo.superiorgenerator.hook;
+package fr.nivcoo.superiorgenerator.hook.superiorskyblock;
 
 import com.bgsoftware.superiorskyblock.api.SuperiorSkyblockAPI;
 import com.bgsoftware.superiorskyblock.api.island.Island;
@@ -13,16 +13,22 @@ public class SuperiorSkyblock2 {
 
     public static UUID getIslandUUIDByMember(Player p) {
 
-        SuperiorPlayer superiorPlayer = SuperiorSkyblockAPI.getPlayer(p);
-        if (superiorPlayer == null)
-            return null;
-
-        Island island = superiorPlayer.getIsland();
+        Island island = getIslandByMember(p);
 
         if (island == null)
             return null;
 
         return island.getUniqueId();
+
+    }
+
+    public static Island getIslandByMember(Player p) {
+
+        SuperiorPlayer superiorPlayer = SuperiorSkyblockAPI.getPlayer(p);
+        if (superiorPlayer == null)
+            return null;
+
+        return superiorPlayer.getIsland();
 
     }
 

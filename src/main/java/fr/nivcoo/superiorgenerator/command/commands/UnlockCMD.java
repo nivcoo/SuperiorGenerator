@@ -1,10 +1,11 @@
 package fr.nivcoo.superiorgenerator.command.commands;
 
 
+import com.bgsoftware.superiorskyblock.api.island.Island;
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
 import fr.nivcoo.superiorgenerator.command.CCommand;
-import fr.nivcoo.superiorgenerator.hook.SuperiorSkyblock2;
+import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
 import fr.nivcoo.superiorgenerator.manager.Generator;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.utilsz.config.Config;
@@ -59,8 +60,14 @@ public class UnlockCMD implements CCommand {
         GeneratorManager generatorManager = plugin.getGeneratorManager();
         CacheManager cacheManager = plugin.getCacheManager();
         Player player = Bukkit.getPlayer(args[1]);
+
         if (player == null) {
             sender.sendMessage(config.getString("messages.commands.unlock.not_found_player", args[1]));
+            return;
+        }
+        Island island = SuperiorSkyblock2.getIslandByMember(player);
+        if (island == null) {
+            sender.sendMessage(config.getString("messages.commands.unlock.no_island", player.getName()));
             return;
         }
         String generatorID = args[2];
@@ -70,7 +77,7 @@ public class UnlockCMD implements CCommand {
             return;
         }
 
-        UUID islandUUID = SuperiorSkyblock2.getIslandUUIDByMember(player);
+        UUID islandUUID = island.getUniqueId();
 
         if (cacheManager.unlockGenerator(islandUUID, generatorManager.getGeneratorByID(generatorID)))
             sender.sendMessage(config.getString("messages.commands.unlock.success", generatorID, player.getName()));

@@ -1,10 +1,12 @@
 package fr.nivcoo.superiorgenerator.command.commands;
 
 
+import com.bgsoftware.superiorskyblock.api.island.Island;
+import com.bgsoftware.superiorskyblock.api.island.IslandPrivilege;
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
 import fr.nivcoo.superiorgenerator.command.CCommand;
-import fr.nivcoo.superiorgenerator.hook.SuperiorSkyblock2;
+import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
 import fr.nivcoo.superiorgenerator.manager.Generator;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.utilsz.config.Config;
@@ -60,7 +62,19 @@ public class SelectCMD implements CCommand {
         CacheManager cacheManager = plugin.getCacheManager();
         String generatorID = args[1];
         Generator generator = generatorManager.getGeneratorByID(generatorID);
-        UUID islandUUID = SuperiorSkyblock2.getIslandUUIDByMember(player);
+        Island island = SuperiorSkyblock2.getIslandByMember(player);
+        if (island == null) {
+            sender.sendMessage(config.getString("messages.commands.select.no_island"));
+            return;
+        }
+
+        if (!island.hasPermission(player, IslandPrivilege.getByName("MANAGE_GENERATOR"))) {
+            sender.sendMessage(config.getString("messages.commands.select.no_permission"));
+            return;
+        }
+
+
+        UUID islandUUID = island.getUniqueId();
         if (cacheManager.getIfUnlocked(islandUUID, generator)) {
             if (cacheManager.selectIslandGenerator(islandUUID, generator))
                 sender.sendMessage(config.getString("messages.commands.select.success", generatorID, player.getName()));

@@ -2,7 +2,7 @@ package fr.nivcoo.superiorgenerator.placeholder;
 
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
-import fr.nivcoo.superiorgenerator.hook.SuperiorSkyblock2;
+import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
 import fr.nivcoo.superiorgenerator.manager.Generator;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;

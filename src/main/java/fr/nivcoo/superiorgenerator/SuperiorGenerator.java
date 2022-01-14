@@ -3,6 +3,7 @@ package fr.nivcoo.superiorgenerator;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
 import fr.nivcoo.superiorgenerator.command.commands.SelectCMD;
 import fr.nivcoo.superiorgenerator.command.commands.UnlockCMD;
+import fr.nivcoo.superiorgenerator.hook.superiorskyblock.permission.ManageGenerator;
 import fr.nivcoo.superiorgenerator.listener.BlockListener;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.superiorgenerator.placeholder.PlaceHolderAPI;
@@ -53,6 +54,9 @@ public class SuperiorGenerator extends JavaPlugin {
         commandManager = new CommandManager(this, config, "generator", "superiorgenerator.commands");
         commandManager.addCommand(new UnlockCMD());
         commandManager.addCommand(new SelectCMD());
+
+
+        Bukkit.getPluginManager().registerEvents(new ManageGenerator(), this);
 
     }
 
