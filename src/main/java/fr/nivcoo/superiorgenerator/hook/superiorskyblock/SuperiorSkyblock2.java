@@ -1,15 +1,33 @@
 package fr.nivcoo.superiorgenerator.hook.superiorskyblock;
 
 import com.bgsoftware.superiorskyblock.api.SuperiorSkyblockAPI;
+import com.bgsoftware.superiorskyblock.api.events.PluginInitializeEvent;
 import com.bgsoftware.superiorskyblock.api.island.Island;
+import com.bgsoftware.superiorskyblock.api.island.IslandPrivilege;
 import com.bgsoftware.superiorskyblock.api.wrappers.SuperiorPlayer;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
+import org.bukkit.event.EventHandler;
+import org.bukkit.event.Listener;
 
 import java.util.UUID;
 
-public class SuperiorSkyblock2 {
+public class SuperiorSkyblock2 implements Listener {
+
+
+    private IslandPrivilege MANAGE_GENERATOR;
+
+    @EventHandler
+    public void init(PluginInitializeEvent e) {
+        IslandPrivilege.register("MANAGE_GENERATOR");
+        MANAGE_GENERATOR = IslandPrivilege.getByName("MANAGE_GENERATOR");
+    }
+
+    public IslandPrivilege getManageGeneratorPermission() {
+        return MANAGE_GENERATOR;
+    }
+
 
     public static UUID getIslandUUIDByMember(Player p) {
 

@@ -3,7 +3,7 @@ package fr.nivcoo.superiorgenerator;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
 import fr.nivcoo.superiorgenerator.command.commands.SelectCMD;
 import fr.nivcoo.superiorgenerator.command.commands.UnlockCMD;
-import fr.nivcoo.superiorgenerator.hook.superiorskyblock.permission.ManageGenerator;
+import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
 import fr.nivcoo.superiorgenerator.listener.BlockListener;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.superiorgenerator.placeholder.PlaceHolderAPI;
@@ -21,6 +21,7 @@ public class SuperiorGenerator extends JavaPlugin {
     private static SuperiorGenerator INSTANCE;
     private Config config;
     private Database database;
+    private SuperiorSkyblock2 superiorSkyblock2;
     private GeneratorManager generatorManager;
     private CacheManager cacheManager;
     private CommandManager commandManager;
@@ -39,6 +40,10 @@ public class SuperiorGenerator extends JavaPlugin {
         database = new Database(db.getPath());
         database.initDB();
 
+
+        superiorSkyblock2 = new SuperiorSkyblock2();
+        Bukkit.getPluginManager().registerEvents(superiorSkyblock2, this);
+
         generatorManager = new GeneratorManager();
 
         cacheManager = new CacheManager();
@@ -55,8 +60,6 @@ public class SuperiorGenerator extends JavaPlugin {
         commandManager.addCommand(new UnlockCMD());
         commandManager.addCommand(new SelectCMD());
 
-
-        Bukkit.getPluginManager().registerEvents(new ManageGenerator(), this);
 
     }
 
@@ -80,6 +83,10 @@ public class SuperiorGenerator extends JavaPlugin {
 
     public Database getDatabase() {
         return database;
+    }
+
+    public SuperiorSkyblock2 getSuperiorSkyblock2() {
+        return superiorSkyblock2;
     }
 
     public GeneratorManager getGeneratorManager() {

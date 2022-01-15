@@ -2,7 +2,6 @@ package fr.nivcoo.superiorgenerator.command.commands;
 
 
 import com.bgsoftware.superiorskyblock.api.island.Island;
-import com.bgsoftware.superiorskyblock.api.island.IslandPrivilege;
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
 import fr.nivcoo.superiorgenerator.command.CCommand;
@@ -68,7 +67,7 @@ public class SelectCMD implements CCommand {
             return;
         }
 
-        if (!island.hasPermission(player, IslandPrivilege.getByName("MANAGE_GENERATOR"))) {
+        if (!island.hasPermission(player, plugin.getSuperiorSkyblock2().getManageGeneratorPermission())) {
             sender.sendMessage(config.getString("messages.commands.select.no_permission"));
             return;
         }
