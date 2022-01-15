@@ -23,10 +23,12 @@ enable_basalt_generator: false
 generators:
   # do not delete the default one
   default:
+    category: 1
     blocks:
       - COBBLESTONE:80
       - STONE:15
       - DIORITE:5
   bedrock:
+    category: 2
     blocks:
       - BEDROCK:100

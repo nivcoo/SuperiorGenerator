@@ -32,6 +32,7 @@ public class GeneratorManager {
         for (String ID : generators) {
 
             String path = "generators." + ID + ".";
+            String category = path + "category";
 
             List<String> blocksString = config.getStringList(path + "blocks");
             HashMap<Material, Double> blocks = new HashMap<>();
@@ -48,7 +49,7 @@ public class GeneratorManager {
                 blocks.put(material, Double.valueOf(split[1]));
             }
 
-            generatorsList.add(new Generator(ID, blocks));
+            generatorsList.add(new Generator(ID, category, blocks));
 
         }
     }

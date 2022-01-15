@@ -51,6 +51,10 @@ public class PlaceHolderAPI extends PlaceholderExpansion {
             if (island == null)
                 return "false";
             return String.valueOf(island.hasPermission(player, superiorGenerator.getSuperiorSkyblock2().getManageGeneratorPermission()));
+        } else if (identifier.equals("get_current_category")) {
+
+
+            return String.valueOf(cacheManager.getCurrentIslandGenerator(player).getCategory());
         } else if (identifier.startsWith("is_unlocked_")) {
             UUID islandUUID = SuperiorSkyblock2.getIslandUUIDByMember(player);
 
