@@ -32,7 +32,7 @@ public class GeneratorManager {
         for (String ID : generators) {
 
             String path = "generators." + ID + ".";
-            String category = path + "category";
+            String category = config.getString(path + "category");
 
             List<String> blocksString = config.getStringList(path + "blocks");
             HashMap<Material, Double> blocks = new HashMap<>();
