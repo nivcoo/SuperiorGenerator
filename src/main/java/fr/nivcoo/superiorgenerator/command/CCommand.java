@@ -47,8 +47,6 @@ public interface CCommand extends Command {
         for (Generator generator : SuperiorGenerator.get().getCacheManager().getAllUnlockedGeneratorsOfIsland(islandUUID)) {
             generatorsName.add(generator.getID());
         }
-        if (!generatorsName.contains("default"))
-            generatorsName.add("default");
         return generatorsName;
     }
 }

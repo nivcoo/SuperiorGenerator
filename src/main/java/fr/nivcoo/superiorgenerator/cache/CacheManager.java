@@ -16,6 +16,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class CacheManager implements Listener {
 
@@ -67,7 +68,7 @@ public class CacheManager implements Listener {
 
     public Generator getCurrentIslandGenerator(UUID islandUUID) {
         if (islandUUID == null)
-            return generatorManager.getGeneratorByID("default");
+            return generatorManager.getDefaultGenerator();
         Generator generator = activeGenerators.get(islandUUID);
         if (generator != null)
             return generator;
@@ -75,7 +76,7 @@ public class CacheManager implements Listener {
             String generatorUUID = database.getCurrentIslandGeneratorID(islandUUID);
             Generator activeGenerator = generatorManager.getGeneratorByID(generatorUUID);
             if (activeGenerator == null)
-                activeGenerator = generatorManager.getGeneratorByID("default");
+                activeGenerator = generatorManager.getDefaultGenerator();
             activeGenerators.put(islandUUID, activeGenerator);
             updateUnlockedGenerator(islandUUID);
             return activeGenerator;
@@ -130,6 +131,16 @@ public class CacheManager implements Listener {
         List<Generator> generators = unlockedGenerators.get(islandUUID);
         if (generators == null)
             generators = new ArrayList<>();
+        Generator defaultGenerator = generatorManager.getDefaultGenerator();
+        if (!generators.contains(defaultGenerator))
+            generators.add(defaultGenerator);
         return generators;
+    }
+
+
+    public int getUnlockedCategoriesNumber(UUID islandUUID, String category) {
+
+        List<Generator> generators = getAllUnlockedGeneratorsOfIsland(islandUUID).stream().filter(generator -> generator.getCategory().equals(category)).collect(Collectors.toList());
+        return generators.size();
     }
 }

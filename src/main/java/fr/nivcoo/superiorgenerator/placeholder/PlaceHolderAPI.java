@@ -65,6 +65,13 @@ public class PlaceHolderAPI extends PlaceholderExpansion {
             if (generator == null)
                 return "false";
             return String.valueOf(cacheManager.getIfUnlocked(islandUUID, generator));
+        } else if (identifier.startsWith("unlocked_categories_number_")) {
+            UUID islandUUID = SuperiorSkyblock2.getIslandUUIDByMember(player);
+            if (islandUUID == null)
+                return "0";
+            String category = identifier.replace("unlocked_categories_number_", "");
+            int number = cacheManager.getUnlockedCategoriesNumber(islandUUID, category);
+            return String.valueOf(number);
         }
 
         return null;

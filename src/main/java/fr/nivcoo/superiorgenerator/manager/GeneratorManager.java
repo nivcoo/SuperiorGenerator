@@ -14,6 +14,7 @@ public class GeneratorManager {
     private Config config;
 
     private List<Generator> generatorsList;
+    private Generator defaultGenerator;
 
     public GeneratorManager() {
         superiorGenerator = SuperiorGenerator.get();
@@ -21,9 +22,17 @@ public class GeneratorManager {
         config = superiorGenerator.getConfiguration();
 
         loadGenerators();
+        saveDefaultGenerator();
 
     }
 
+    public void saveDefaultGenerator() {
+        defaultGenerator = getGeneratorByID("default");
+    }
+
+    public Generator getDefaultGenerator() {
+        return defaultGenerator;
+    }
 
     void loadGenerators() {
         generatorsList = new ArrayList<>();
