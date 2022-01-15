@@ -40,7 +40,7 @@ public class Database {
     public void initDB() {
         connect();
         query("CREATE TABLE IF NOT EXISTS active_generator (" + "island_uuid TEXT PRIMARY KEY, " + "generator_id TEXT DEFAULT 0 " + ")");
-        query("CREATE TABLE IF NOT EXISTS unlocked_generator (" + "island_uuid TEXT PRIMARY KEY, " + "generator_id TEXT DEFAULT 0 " + ")");
+        query("CREATE TABLE IF NOT EXISTS unlocked_generator (" + "island_uuid TEXT, " + "generator_id TEXT " + ")");
         close();
 
     }
