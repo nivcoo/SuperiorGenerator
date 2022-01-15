@@ -31,7 +31,7 @@ public class SelectCMD implements CCommand {
 
     @Override
     public String getUsage() {
-        return "select <player> <generator>";
+        return "select <generator>";
     }
 
     @Override
@@ -73,14 +73,15 @@ public class SelectCMD implements CCommand {
         }
 
 
+        String playerName = player.getName();
         UUID islandUUID = island.getUniqueId();
         if (cacheManager.getIfUnlocked(islandUUID, generator)) {
             if (cacheManager.selectIslandGenerator(islandUUID, generator))
-                sender.sendMessage(config.getString("messages.commands.select.success", generatorID, player.getName()));
+                sender.sendMessage(config.getString("messages.commands.select.success", generatorID, playerName));
             else
-                sender.sendMessage(config.getString("messages.commands.select.already", generatorID, player.getName()));
+                sender.sendMessage(config.getString("messages.commands.select.already_selected", generatorID, playerName));
         } else
-            sender.sendMessage(config.getString("messages.commands.select.not_unlocked", generatorID, player.getName()));
+            sender.sendMessage(config.getString("messages.commands.select.not_unlocked", generatorID, playerName));
 
     }
 

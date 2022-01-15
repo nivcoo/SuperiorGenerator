@@ -25,9 +25,10 @@ public class SuperiorSkyblock2 implements Listener {
     }
 
     public IslandPrivilege getManageGeneratorPermission() {
+        if (MANAGE_GENERATOR == null)
+            MANAGE_GENERATOR = IslandPrivilege.getByName("MANAGE_GENERATOR");
         return MANAGE_GENERATOR;
     }
-
 
     public static UUID getIslandUUIDByMember(Player p) {
 

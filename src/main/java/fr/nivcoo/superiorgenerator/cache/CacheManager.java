@@ -66,11 +66,12 @@ public class CacheManager implements Listener {
     }
 
     public Generator getCurrentIslandGenerator(UUID islandUUID) {
+        if (islandUUID == null)
+            return generatorManager.getGeneratorByID("default");
         Generator generator = activeGenerators.get(islandUUID);
         if (generator != null)
             return generator;
         else {
-
             String generatorUUID = database.getCurrentIslandGeneratorID(islandUUID);
             Generator activeGenerator = generatorManager.getGeneratorByID(generatorUUID);
             if (activeGenerator == null)

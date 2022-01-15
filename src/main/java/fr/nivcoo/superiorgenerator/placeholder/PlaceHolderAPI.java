@@ -1,5 +1,6 @@
 package fr.nivcoo.superiorgenerator.placeholder;
 
+import com.bgsoftware.superiorskyblock.api.island.Island;
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
 import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
@@ -41,11 +42,16 @@ public class PlaceHolderAPI extends PlaceholderExpansion {
         CacheManager cacheManager = superiorGenerator.getCacheManager();
 
         GeneratorManager generatorManager = superiorGenerator.getGeneratorManager();
+
         if (identifier.equals("get_current_gen")) {
             return String.valueOf(cacheManager.getCurrentIslandGenerator(player).getID());
-        }
+        } else if (identifier.equals("has_manage_permission")) {
 
-        if (identifier.startsWith("is_unlocked_")) {
+            Island island = SuperiorSkyblock2.getIslandByMember(player);
+            if (island == null)
+                return "false";
+            return String.valueOf(island.hasPermission(player, superiorGenerator.getSuperiorSkyblock2().getManageGeneratorPermission()));
+        } else if (identifier.startsWith("is_unlocked_")) {
             UUID islandUUID = SuperiorSkyblock2.getIslandUUIDByMember(player);
 
             if (islandUUID == null)
