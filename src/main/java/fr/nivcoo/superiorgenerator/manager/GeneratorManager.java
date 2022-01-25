@@ -55,7 +55,6 @@ public class GeneratorManager {
                 Byte data = null;
                 if (splitData.length > 1)
                     data = Byte.parseByte(splitData[1]);
-
                 Material material;
                 try {
                     material = Material.valueOf(materialString);

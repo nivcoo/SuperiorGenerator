@@ -45,10 +45,9 @@ public class BlockListener implements Listener {
         Pair<Material, Byte> selectedBlock = generatorManager.getRandomBlock(generator);
 
 
-        if (selectedBlock.getSecond() == null)
-            newState.setType(selectedBlock.getFirst());
-        else
-            newState.setData(new MaterialData(selectedBlock.getFirst(), selectedBlock.getSecond()));
+        newState.setType(selectedBlock.getFirst());
+        if (selectedBlock.getSecond() != null)
+            newState.setRawData(selectedBlock.getSecond());
 
         SuperiorSkyblock2.addBlockInIsland(newState.getBlock());
     }
