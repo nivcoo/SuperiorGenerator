@@ -51,11 +51,11 @@ public class GeneratorManager {
                 String materialString = split[0];
 
                 String[] splitData = materialString.split("!");
+                materialString = splitData[0];
                 Byte data = null;
-                if(splitData.length > 1) {
+                if (splitData.length > 1)
                     data = Byte.parseByte(splitData[1]);
-                    materialString = splitData[0];
-                }
+
                 Material material;
                 try {
                     material = Material.valueOf(materialString);
@@ -63,7 +63,6 @@ public class GeneratorManager {
                     Bukkit.getLogger().warning("[SuperiorGenerator] The material : " + materialString + " doesn't exist, please check your config !");
                     material = Material.COBBLESTONE;
                 }
-
 
 
                 blocks.put(new Pair<>(material, data), Double.valueOf(split[1]));
