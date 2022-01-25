@@ -44,7 +44,6 @@ public class BlockListener implements Listener {
 
         Pair<Material, Byte> selectedBlock = generatorManager.getRandomBlock(generator);
 
-
         newState.setType(selectedBlock.getFirst());
         if (selectedBlock.getSecond() != null)
             newState.setRawData(selectedBlock.getSecond());
