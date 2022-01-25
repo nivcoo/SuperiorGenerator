@@ -57,7 +57,7 @@ public class GeneratorManager {
                 }
 
                 String[] splitData = split[0].split("!");
-                byte data = 0;
+                Byte data = null;
                 if(splitData.length > 1)
                     data = Byte.parseByte(splitData[1]);
 
