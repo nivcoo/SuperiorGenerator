@@ -6,6 +6,7 @@ import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
 import fr.nivcoo.superiorgenerator.manager.Generator;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.utilsz.config.Config;
+import fr.nivcoo.utilsz.config.Pair;
 import fr.nivcoo.utilsz.version.ServerVersion;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -14,6 +15,7 @@ import org.bukkit.block.BlockState;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockFormEvent;
+import org.bukkit.material.MaterialData;
 
 import java.util.UUID;
 
@@ -40,10 +42,11 @@ public class BlockListener implements Listener {
 
         Generator generator = cacheManager.getCurrentIslandGenerator(islandUUID);
 
-        Material selectedBlock = generatorManager.getRandomBlock(generator);
+        Pair<Material, Byte> selectedBlock = generatorManager.getRandomBlock(generator);
 
 
-        newState.setType(selectedBlock);
+        //newState.setType(selectedBlock);
+        newState.setData(new MaterialData(selectedBlock.getFirst(), selectedBlock.getSecond()));
 
         SuperiorSkyblock2.addBlockInIsland(newState.getBlock());
     }

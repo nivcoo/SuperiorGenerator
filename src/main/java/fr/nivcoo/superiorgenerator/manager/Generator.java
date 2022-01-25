@@ -1,5 +1,6 @@
 package fr.nivcoo.superiorgenerator.manager;
 
+import fr.nivcoo.utilsz.config.Pair;
 import org.bukkit.Material;
 
 import java.util.HashMap;
@@ -8,9 +9,9 @@ public class Generator {
 
     String id;
     String category;
-    HashMap<Material, Double> blocks;
+    HashMap<Pair<Material, Byte>, Double> blocks;
 
-    public Generator(String id, String category, HashMap<Material, Double> blocks) {
+    public Generator(String id, String category, HashMap<Pair<Material, Byte>, Double> blocks) {
         this.id = id;
         this.category = category;
         this.blocks = blocks;
@@ -24,7 +25,7 @@ public class Generator {
         return category;
     }
 
-    public HashMap<Material, Double> getBlocks() {
+    public HashMap<Pair<Material, Byte>, Double> getBlocks() {
         return blocks;
     }
 

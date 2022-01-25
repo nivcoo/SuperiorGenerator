@@ -2,6 +2,7 @@ package fr.nivcoo.superiorgenerator.manager;
 
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.utilsz.config.Config;
+import fr.nivcoo.utilsz.config.Pair;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 
@@ -44,7 +45,7 @@ public class GeneratorManager {
             String category = config.getString(path + "category");
 
             List<String> blocksString = config.getStringList(path + "blocks");
-            HashMap<Material, Double> blocks = new HashMap<>();
+            HashMap<Pair<Material, Byte>, Double> blocks = new HashMap<>();
             for (String blockString : blocksString) {
                 String[] split = blockString.split(":");
                 Material material;
@@ -55,7 +56,12 @@ public class GeneratorManager {
                     material = Material.COBBLESTONE;
                 }
 
-                blocks.put(material, Double.valueOf(split[1]));
+                String[] splitData = split[0].split("!");
+                byte data = 0;
+                if(splitData.length > 1)
+                    data = Byte.parseByte(splitData[1]);
+
+                blocks.put(new Pair<>(material, data), Double.valueOf(split[1]));
             }
 
             generatorsList.add(new Generator(ID, category, blocks));
@@ -69,14 +75,15 @@ public class GeneratorManager {
                 .findAny().orElse(null);
     }
 
-    public Material getRandomBlock(Generator generator) {
+    public Pair<Material, Byte> getRandomBlock(Generator generator) {
         Random random = new Random();
         double d = random.nextDouble() * 100.0D;
-        for (Map.Entry<Material, Double> block : generator.getBlocks().entrySet()) {
-            if ((d -= block.getValue()) < 0.0D)
+        for (Map.Entry<Pair<Material, Byte>, Double> block : generator.getBlocks().entrySet()) {
+            if ((d -= block.getValue()) < 0.0D) {
                 return block.getKey();
+            }
         }
-        return Material.COBBLESTONE;
+        return new Pair<>(Material.COBBLESTONE, null);
     }
 
     public List<Generator> getAllGenerators() {
