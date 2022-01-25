@@ -48,18 +48,23 @@ public class GeneratorManager {
             HashMap<Pair<Material, Byte>, Double> blocks = new HashMap<>();
             for (String blockString : blocksString) {
                 String[] split = blockString.split(":");
+                String materialString = split[0];
+
+                String[] splitData = materialString.split("!");
+                Byte data = null;
+                if(splitData.length > 1) {
+                    data = Byte.parseByte(splitData[1]);
+                    materialString = splitData[0];
+                }
                 Material material;
                 try {
-                    material = Material.valueOf(split[0]);
+                    material = Material.valueOf(materialString);
                 } catch (IllegalArgumentException e) {
-                    Bukkit.getLogger().warning("[SuperiorGenerator] The material : " + split[0] + " doesn't exist, please check your config !");
+                    Bukkit.getLogger().warning("[SuperiorGenerator] The material : " + materialString + " doesn't exist, please check your config !");
                     material = Material.COBBLESTONE;
                 }
 
-                String[] splitData = split[0].split("!");
-                Byte data = null;
-                if(splitData.length > 1)
-                    data = Byte.parseByte(splitData[1]);
+
 
                 blocks.put(new Pair<>(material, data), Double.valueOf(split[1]));
             }
