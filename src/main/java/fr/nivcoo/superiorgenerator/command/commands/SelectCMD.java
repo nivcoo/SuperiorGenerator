@@ -9,6 +9,7 @@ import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
 import fr.nivcoo.superiorgenerator.manager.Generator;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.utilsz.config.Config;
+import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 
@@ -18,6 +19,8 @@ import java.util.List;
 import java.util.UUID;
 
 public class SelectCMD implements CCommand {
+
+    private String adminSelectPermission = "superiorgenerator.admin.command.select.other";
 
     @Override
     public List<String> getAliases() {
@@ -41,7 +44,7 @@ public class SelectCMD implements CCommand {
 
     @Override
     public int getMinArgs() {
-        return 2;
+        return 3;
     }
 
     @Override
@@ -55,20 +58,36 @@ public class SelectCMD implements CCommand {
     }
 
     public void execute(SuperiorGenerator plugin, CommandSender sender, String[] args) {
+        boolean selectForOtherIsland = sender.hasPermission(adminSelectPermission) && args.length == 3;
+        String messagePath = "messages.commands.select.";
         Player player = (Player) sender;
         Config config = plugin.getConfiguration();
+
+        if (selectForOtherIsland) {
+            String playerString = args[2];
+            player = Bukkit.getPlayer(playerString);
+            if (player == null) {
+                sender.sendMessage(config.getString(messagePath + "other.not_found_player", playerString));
+                return;
+            }
+        }
+
         GeneratorManager generatorManager = plugin.getGeneratorManager();
         CacheManager cacheManager = plugin.getCacheManager();
         String generatorID = args[1];
         Generator generator = generatorManager.getGeneratorByID(generatorID);
         Island island = SuperiorSkyblock2.getIslandByMember(player);
+
         if (island == null) {
-            sender.sendMessage(config.getString("messages.commands.select.no_island"));
+            if (selectForOtherIsland)
+                sender.sendMessage(config.getString(messagePath + "other.no_island"));
+            else
+                sender.sendMessage(config.getString(messagePath + "no_island"));
             return;
         }
 
-        if (!island.hasPermission(player, plugin.getSuperiorSkyblock2().getManageGeneratorPermission())) {
-            sender.sendMessage(config.getString("messages.commands.select.no_permission"));
+        if (!selectForOtherIsland && !island.hasPermission(player, plugin.getSuperiorSkyblock2().getManageGeneratorPermission())) {
+            sender.sendMessage(config.getString(messagePath + "no_permission"));
             return;
         }
 
@@ -77,11 +96,12 @@ public class SelectCMD implements CCommand {
         UUID islandUUID = island.getUniqueId();
         if (cacheManager.getIfUnlocked(islandUUID, generator)) {
             if (cacheManager.selectIslandGenerator(islandUUID, generator))
-                sender.sendMessage(config.getString("messages.commands.select.success", generatorID, playerName));
+                sender.sendMessage(config.getString(messagePath + "success", generatorID, playerName));
             else
-                sender.sendMessage(config.getString("messages.commands.select.already_selected", generatorID, playerName));
+                sender.sendMessage(config.getString(messagePath + "already_selected", generatorID, playerName));
         } else
-            sender.sendMessage(config.getString("messages.commands.select.not_unlocked", generatorID, playerName));
+            sender.sendMessage(config.getString(messagePath + "not_unlocked", generatorID, playerName));
+
 
     }
 
@@ -91,6 +111,8 @@ public class SelectCMD implements CCommand {
             Player player = (Player) sender;
             UUID islandUUID = SuperiorSkyblock2.getIslandUUIDByMember(player);
             return getUnlockedGeneratorsName(islandUUID);
+        } else if (sender.hasPermission(adminSelectPermission) && args.length == 3) {
+            return getOnlinePlayersNames();
         }
         return new ArrayList<>();
     }

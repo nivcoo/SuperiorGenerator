@@ -17,3 +17,6 @@ permissions:
   superiorgenerator.command.select:
     default: op
     description: select generator for island
+  superiorgenerator.admin.command.select.other:
+    default: op
+    description: select generator for another island

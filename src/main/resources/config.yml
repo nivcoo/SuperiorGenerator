@@ -19,6 +19,9 @@ messages:
       not_unlocked: "&7[&c&lES&7] &cLe générateur n'est pas débloqué !"
       no_permission: "&7[&c&lES&7] &cVous ne pouvez pas améliorer votre générateur !"
       no_island: "&7[&c&lES&7] &cVous n'avez pas d'île !"
+      other:
+        not_found_player: "&7[&c&lES&7] &cLe joueur {0} n'a pas été trouvé !"
+        no_island: "&7[&c&lES&7] &cLe joueur n'a pas d'île !"
 enable_basalt_generator: false
 generators:
   # do not delete the default one
