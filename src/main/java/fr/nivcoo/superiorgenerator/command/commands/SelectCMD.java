@@ -44,12 +44,12 @@ public class SelectCMD implements CCommand {
 
     @Override
     public int getMinArgs() {
-        return 3;
+        return 2;
     }
 
     @Override
     public int getMaxArgs() {
-        return 2;
+        return 3;
     }
 
     @Override
