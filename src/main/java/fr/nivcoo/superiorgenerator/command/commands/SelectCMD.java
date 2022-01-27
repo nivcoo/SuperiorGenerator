@@ -107,12 +107,16 @@ public class SelectCMD implements CCommand {
 
     @Override
     public List<String> tabComplete(SuperiorGenerator plugin, CommandSender sender, String[] args) {
-        if (args.length == 2) {
+        if(sender.hasPermission(adminSelectPermission)) {
+            if (args.length == 2) {
+                return getAllGeneratorsName();
+            } else if (args.length == 3) {
+                return getOnlinePlayersNames();
+            }
+        } else if (args.length == 2) {
             Player player = (Player) sender;
             UUID islandUUID = SuperiorSkyblock2.getIslandUUIDByMember(player);
             return getUnlockedGeneratorsName(islandUUID);
-        } else if (sender.hasPermission(adminSelectPermission) && args.length == 3) {
-            return getOnlinePlayersNames();
         }
         return new ArrayList<>();
     }

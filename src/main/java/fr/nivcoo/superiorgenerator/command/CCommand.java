@@ -49,4 +49,12 @@ public interface CCommand extends Command {
         }
         return generatorsName;
     }
+
+    default List<String> getAllGeneratorsName() {
+        List<String> generatorsName = new ArrayList<>();
+        for (Generator generator : SuperiorGenerator.get().getGeneratorManager().getAllGenerators()) {
+            generatorsName.add(generator.getID());
+        }
+        return generatorsName;
+    }
 }
