@@ -113,9 +113,7 @@ public class CacheManager implements Listener {
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
 
-        UUID islandUUID = SuperiorSkyblock2.getIslandUUIDByMember(p);
-
-        getCurrentIslandGenerator(islandUUID);
+        getCurrentIslandGenerator(p);
 
     }
 
