@@ -5,7 +5,6 @@ import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
 import fr.nivcoo.superiorgenerator.manager.Generator;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.superiorgenerator.utils.Database;
-import fr.nivcoo.utilsz.config.Config;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -21,7 +20,6 @@ import java.util.stream.Collectors;
 public class CacheManager implements Listener {
 
     private SuperiorGenerator superiorGenerator;
-    private Config config;
     private Database database;
     private GeneratorManager generatorManager;
 
@@ -31,8 +29,6 @@ public class CacheManager implements Listener {
 
     public CacheManager() {
         superiorGenerator = SuperiorGenerator.get();
-
-        config = superiorGenerator.getConfiguration();
         database = superiorGenerator.getDatabase();
         generatorManager = superiorGenerator.getGeneratorManager();
         unlockedGenerators = new HashMap<>();
@@ -117,7 +113,7 @@ public class CacheManager implements Listener {
 
     }
 
-    public boolean getIfUnlocked(UUID islandUUID, Generator generator) {
+    public boolean isAlreadyUnlocked(UUID islandUUID, Generator generator) {
         List<Generator> generators = unlockedGenerators.get(islandUUID);
         if (generators == null || generator == null)
             return false;

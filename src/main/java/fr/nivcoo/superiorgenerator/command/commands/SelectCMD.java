@@ -94,20 +94,24 @@ public class SelectCMD implements CCommand {
 
         String playerName = player.getName();
         UUID islandUUID = island.getUniqueId();
-        if (cacheManager.getIfUnlocked(islandUUID, generator)) {
+        String returnMessage;
+        if (cacheManager.isAlreadyUnlocked(islandUUID, generator)) {
             if (cacheManager.selectIslandGenerator(islandUUID, generator))
-                sender.sendMessage(config.getString(messagePath + "success", generatorID, playerName));
+                returnMessage = config.getString(messagePath + "success", generatorID, playerName);
+
             else
-                sender.sendMessage(config.getString(messagePath + "already_selected", generatorID, playerName));
+                returnMessage = config.getString(messagePath + "already_selected", generatorID, playerName);
+
         } else
-            sender.sendMessage(config.getString(messagePath + "not_unlocked", generatorID, playerName));
+            returnMessage = config.getString(messagePath + "not_unlocked", generatorID, playerName);
 
-
+        if (!returnMessage.equals(""))
+            sender.sendMessage(returnMessage);
     }
 
     @Override
     public List<String> tabComplete(SuperiorGenerator plugin, CommandSender sender, String[] args) {
-        if(sender.hasPermission(adminSelectPermission)) {
+        if (sender.hasPermission(adminSelectPermission)) {
             if (args.length == 2) {
                 return getAllGeneratorsName();
             } else if (args.length == 3) {

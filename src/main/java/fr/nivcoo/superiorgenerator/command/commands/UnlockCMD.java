@@ -78,13 +78,15 @@ public class UnlockCMD implements CCommand {
         }
 
         UUID islandUUID = island.getUniqueId();
-
+        String returnMessage;
         if (cacheManager.unlockGenerator(islandUUID, generatorManager.getGeneratorByID(generatorID)))
-            sender.sendMessage(config.getString("messages.commands.unlock.success", generatorID, player.getName()));
+            returnMessage = config.getString("messages.commands.unlock.success", generatorID, player.getName());
         else {
-            sender.sendMessage(config.getString("messages.commands.unlock.already_unlock", generatorID, player.getName()));
+            returnMessage = config.getString("messages.commands.unlock.already_unlock", generatorID, player.getName());
         }
 
+        if (!returnMessage.equals(""))
+            sender.sendMessage(returnMessage);
     }
 
     @Override

@@ -45,61 +45,14 @@ public class Database {
 
     }
 
-    public ResultSet query(String requet) {
-        ResultSet resultat = null;
+    public void query(String request) {
         try {
-            resultat = statement.executeQuery(requet);
+            statement.executeQuery(request);
         } catch (SQLException ignored) {
         }
-        return resultat;
-
-    }
-
-    public void updatePlayerCount(UUID uuid, int count) {
-        connect();
-        try {
-            PreparedStatement preparedStatement = connection.prepareStatement("REPLACE INTO classement VALUES (?, ?);");
-            preparedStatement.setString(1, uuid.toString());
-            preparedStatement.setInt(2, count);
-            preparedStatement.executeUpdate();
-            preparedStatement.close();
-
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        close();
-    }
-
-    public HashMap<UUID, Integer> getAllPlayersCount(Collection<? extends Player> collection) {
-        connect();
-        HashMap<UUID, Integer> allPlayersCount = new HashMap<>();
-        for (Player player : collection)
-            allPlayersCount.put(player.getUniqueId(), 0);
-        try {
-            String sqlIN = collection.stream().map(x -> "'" + x.getUniqueId() + "'")
-                    .collect(Collectors.joining(",", "(", ")"));
-            PreparedStatement preparedStatement = connection
-                    .prepareStatement("SELECT * FROM classement WHERE UUID IN " + sqlIN);
-
-            ResultSet rs = preparedStatement.executeQuery();
-
-            while (rs.next()) {
-                UUID uuid = UUID.fromString(rs.getString("UUID"));
-                int count = rs.getInt("count");
-                allPlayersCount.put(uuid, count);
-            }
-            preparedStatement.close();
-            rs.close();
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        close();
-
-        return allPlayersCount;
     }
 
     public void addOrEditUnlockedGenerator(UUID islandUUID, String generatorID) {
-        connect();
         if (!hasAlreadyUnlock(islandUUID, generatorID)) {
             insertNewUnlockedGen(islandUUID, generatorID);
         }
@@ -109,8 +62,6 @@ public class Database {
         } else {
             updateActiveGen(islandUUID, generatorID);
         }
-
-        close();
     }
 
     public void updateActiveGen(UUID islandUUID, String generatorID) {
