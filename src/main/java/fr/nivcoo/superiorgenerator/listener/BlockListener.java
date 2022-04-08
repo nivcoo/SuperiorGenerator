@@ -46,9 +46,7 @@ public class BlockListener implements Listener {
         newState.setType(selectedBlock.getFirst());
         if (selectedBlock.getSecond() != null)
             newState.setRawData(selectedBlock.getSecond());
-
-        newState.update(true);
-        SuperiorSkyblock2.addBlockInIsland(newState.getBlock());
+        SuperiorSkyblock2.addBlockInIsland(newState.getLocation().getBlock());
 
     }
 
