@@ -91,7 +91,6 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
             configFile.getParentFile().mkdirs();
             saveResource(path, false);
         }
-
         return configFile;
     }
 
