@@ -4,8 +4,8 @@ import com.bgsoftware.superiorskyblock.api.island.Island;
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
 import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
-import fr.nivcoo.superiorgenerator.manager.Generator;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
+import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
@@ -61,7 +61,7 @@ public class PlaceHolderAPI extends PlaceholderExpansion {
             if (islandUUID == null)
                 return "false";
             String generatorID = identifier.replace("is_unlocked_", "");
-            Generator generator = generatorManager.getGeneratorByID(generatorID);
+            AGenerator generator = generatorManager.getGeneratorByID(generatorID);
             if (generator == null)
                 return "false";
             return String.valueOf(cacheManager.isAlreadyUnlocked(islandUUID, generator));

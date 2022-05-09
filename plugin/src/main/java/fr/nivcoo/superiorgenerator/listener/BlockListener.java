@@ -3,8 +3,8 @@ package fr.nivcoo.superiorgenerator.listener;
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
 import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
-import fr.nivcoo.superiorgenerator.manager.Generator;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
+import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import fr.nivcoo.utilsz.config.Config;
 import fr.nivcoo.utilsz.config.Pair;
 import fr.nivcoo.utilsz.version.ServerVersion;
@@ -39,7 +39,7 @@ public class BlockListener implements Listener {
 
     private void generateRandomBlock(BlockState newState, UUID islandUUID) {
 
-        Generator generator = cacheManager.getCurrentIslandGenerator(islandUUID);
+        AGenerator generator = cacheManager.getCurrentIslandGenerator(islandUUID);
 
         Pair<Material, Byte> selectedBlock = generatorManager.getRandomBlock(generator);
 

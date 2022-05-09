@@ -2,9 +2,9 @@ package fr.nivcoo.superiorgenerator.cache;
 
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
-import fr.nivcoo.superiorgenerator.manager.Generator;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.superiorgenerator.utils.Database;
+import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -23,8 +23,8 @@ public class CacheManager implements Listener {
     private Database database;
     private GeneratorManager generatorManager;
 
-    HashMap<UUID, List<Generator>> unlockedGenerators;
-    HashMap<UUID, Generator> activeGenerators;
+    HashMap<UUID, List<AGenerator>> unlockedGenerators;
+    HashMap<UUID, AGenerator> activeGenerators;
 
 
     public CacheManager() {
@@ -46,10 +46,10 @@ public class CacheManager implements Listener {
     void updateUnlockedGenerator(UUID islandUUID) {
 
         List<String> unlockedGeneratorsID = database.getAllUnlockedIslandGeneratorID(islandUUID);
-        List<Generator> generators = new ArrayList<>();
+        List<AGenerator> generators = new ArrayList<>();
 
         for (String unlockedGeneratorID : unlockedGeneratorsID) {
-            Generator generator = generatorManager.getGeneratorByID(unlockedGeneratorID);
+            AGenerator generator = generatorManager.getGeneratorByID(unlockedGeneratorID);
             if (generator != null)
                 generators.add(generator);
         }
@@ -58,19 +58,19 @@ public class CacheManager implements Listener {
 
     }
 
-    public Generator getCurrentIslandGenerator(Player p) {
+    public AGenerator getCurrentIslandGenerator(Player p) {
         return getCurrentIslandGenerator(SuperiorSkyblock2.getIslandUUIDByMember(p));
     }
 
-    public Generator getCurrentIslandGenerator(UUID islandUUID) {
+    public AGenerator getCurrentIslandGenerator(UUID islandUUID) {
         if (islandUUID == null)
             return generatorManager.getDefaultGenerator();
-        Generator generator = activeGenerators.get(islandUUID);
+        AGenerator generator = activeGenerators.get(islandUUID);
         if (generator != null)
             return generator;
         else {
             String generatorUUID = database.getCurrentIslandGeneratorID(islandUUID);
-            Generator activeGenerator = generatorManager.getGeneratorByID(generatorUUID);
+            AGenerator activeGenerator = generatorManager.getGeneratorByID(generatorUUID);
             if (activeGenerator == null)
                 activeGenerator = generatorManager.getDefaultGenerator();
             activeGenerators.put(islandUUID, activeGenerator);
@@ -79,8 +79,8 @@ public class CacheManager implements Listener {
         }
     }
 
-    public boolean selectIslandGenerator(UUID islandUUID, Generator generator) {
-        Generator gen = activeGenerators.get(islandUUID);
+    public boolean selectIslandGenerator(UUID islandUUID, AGenerator generator) {
+        AGenerator gen = activeGenerators.get(islandUUID);
         if (gen == generator)
             return false;
         activeGenerators.put(islandUUID, generator);
@@ -88,10 +88,10 @@ public class CacheManager implements Listener {
         return true;
     }
 
-    public boolean unlockGenerator(UUID islandUUID, Generator generator) {
+    public boolean unlockGenerator(UUID islandUUID, AGenerator generator) {
         activeGenerators.put(islandUUID, generator);
 
-        List<Generator> unlockedGenerator = unlockedGenerators.get(islandUUID);
+        List<AGenerator> unlockedGenerator = unlockedGenerators.get(islandUUID);
         if (unlockedGenerator == null)
             unlockedGenerator = new ArrayList<>();
         if (unlockedGenerator.contains(generator) || generator == null || generator.getID().equals("default"))
@@ -113,19 +113,19 @@ public class CacheManager implements Listener {
 
     }
 
-    public boolean isAlreadyUnlocked(UUID islandUUID, Generator generator) {
-        List<Generator> generators = unlockedGenerators.get(islandUUID);
+    public boolean isAlreadyUnlocked(UUID islandUUID, AGenerator generator) {
+        List<AGenerator> generators = unlockedGenerators.get(islandUUID);
         if (generators == null || generator == null)
             return false;
 
         return generators.contains(generator) || generator.getID().equals("default");
     }
 
-    public List<Generator> getAllUnlockedGeneratorsOfIsland(UUID islandUUID) {
-        List<Generator> generators = unlockedGenerators.get(islandUUID);
+    public List<AGenerator> getAllUnlockedGeneratorsOfIsland(UUID islandUUID) {
+        List<AGenerator> generators = unlockedGenerators.get(islandUUID);
         if (generators == null)
             generators = new ArrayList<>();
-        Generator defaultGenerator = generatorManager.getDefaultGenerator();
+        AGenerator defaultGenerator = generatorManager.getDefaultGenerator();
         if (!generators.contains(defaultGenerator))
             generators.add(defaultGenerator);
         return generators;
@@ -134,7 +134,7 @@ public class CacheManager implements Listener {
 
     public int getUnlockedCategoriesNumber(UUID islandUUID, String category) {
 
-        List<Generator> generators = getAllUnlockedGeneratorsOfIsland(islandUUID).stream().filter(generator -> generator.getCategory().equals(category)).collect(Collectors.toList());
+        List<AGenerator> generators = getAllUnlockedGeneratorsOfIsland(islandUUID).stream().filter(generator -> generator.getCategory().equals(category)).collect(Collectors.toList());
         return generators.size();
     }
 }

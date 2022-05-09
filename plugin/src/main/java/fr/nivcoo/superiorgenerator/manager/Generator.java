@@ -1,11 +1,12 @@
 package fr.nivcoo.superiorgenerator.manager;
 
+import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import fr.nivcoo.utilsz.config.Pair;
 import org.bukkit.Material;
 
 import java.util.HashMap;
 
-public class Generator {
+public class Generator implements AGenerator {
 
     String id;
     String category;

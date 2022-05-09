@@ -4,18 +4,23 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>fr.nivcoo</groupId>
-    <artifactId>SuperiorGenerator</artifactId>
+    <artifactId>SuperiorGeneratorPlugin</artifactId>
     <version>1.0.0</version>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
-    <url>http://maven.apache.org</url>
+    <url>https://maven.apache.org</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
+
+    <modules>
+        <module>API</module>
+        <module>plugin</module>
+    </modules>
 
     <repositories>
         <repository>
@@ -49,26 +54,14 @@
         </dependency>
 
         <dependency>
-            <groupId>com.bgsoftware</groupId>
-            <artifactId>SuperiorSkyblockAPI</artifactId>
-            <version>1.8.3</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
-            <groupId>me.clip</groupId>
-            <artifactId>placeholderapi</artifactId>
-            <version>2.11.1</version>
-            <scope>provided</scope>
-        </dependency>
-
-        <dependency>
             <groupId>fr.nivcoo</groupId>
             <artifactId>UtilsZ</artifactId>
             <version>1.0.12</version>
             <scope>compile</scope>
         </dependency>
+
     </dependencies>
+
 
     <build>
         <defaultGoal>clean install</defaultGoal>

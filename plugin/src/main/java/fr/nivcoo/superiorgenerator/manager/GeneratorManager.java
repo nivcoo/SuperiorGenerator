@@ -1,6 +1,8 @@
 package fr.nivcoo.superiorgenerator.manager;
 
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
+import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
+import fr.nivcoo.superiorgeneratorapi.manager.AGeneratorManager;
 import fr.nivcoo.utilsz.config.Config;
 import fr.nivcoo.utilsz.config.Pair;
 import org.bukkit.Bukkit;
@@ -8,14 +10,14 @@ import org.bukkit.Material;
 
 import java.util.*;
 
-public class GeneratorManager {
+public class GeneratorManager implements AGeneratorManager {
 
 
     private SuperiorGenerator superiorGenerator;
     private Config config;
 
-    private List<Generator> generatorsList;
-    private Generator defaultGenerator;
+    private List<AGenerator> generatorsList;
+    private AGenerator defaultGenerator;
 
     public GeneratorManager() {
         superiorGenerator = SuperiorGenerator.get();
@@ -31,7 +33,7 @@ public class GeneratorManager {
         defaultGenerator = getGeneratorByID("default");
     }
 
-    public Generator getDefaultGenerator() {
+    public AGenerator getDefaultGenerator() {
         return defaultGenerator;
     }
 
@@ -72,13 +74,13 @@ public class GeneratorManager {
         }
     }
 
-    public Generator getGeneratorByID(String ID) {
+    public AGenerator getGeneratorByID(String ID) {
 
         return generatorsList.stream().filter(generator -> generator.getID().equals(ID))
                 .findAny().orElse(null);
     }
 
-    public Pair<Material, Byte> getRandomBlock(Generator generator) {
+    public Pair<Material, Byte> getRandomBlock(AGenerator generator) {
         Random random = new Random();
         double d = random.nextDouble() * 100.0D;
         for (Map.Entry<Pair<Material, Byte>, Double> block : generator.getBlocks().entrySet()) {
@@ -89,7 +91,8 @@ public class GeneratorManager {
         return new Pair<>(Material.COBBLESTONE, null);
     }
 
-    public List<Generator> getAllGenerators() {
+    public List<AGenerator> getAllGenerators() {
         return generatorsList;
     }
+
 }

@@ -8,6 +8,8 @@ import fr.nivcoo.superiorgenerator.listener.BlockListener;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.superiorgenerator.placeholder.PlaceHolderAPI;
 import fr.nivcoo.superiorgenerator.utils.Database;
+import fr.nivcoo.superiorgeneratorapi.ASuperiorGenerator;
+import fr.nivcoo.superiorgeneratorapi.SuperiorGeneratorAPI;
 import fr.nivcoo.utilsz.commands.CommandManager;
 import fr.nivcoo.utilsz.config.Config;
 import org.bukkit.Bukkit;
@@ -15,8 +17,9 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Field;
 
-public class SuperiorGenerator extends JavaPlugin {
+public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator {
 
     private static SuperiorGenerator INSTANCE;
     private Config config;
@@ -29,6 +32,7 @@ public class SuperiorGenerator extends JavaPlugin {
     @Override
     public void onEnable() {
         INSTANCE = this;
+        loadAPI();
         config = new Config(loadFile("config.yml"));
         File db = new File(getDataFolder(), "database.db");
         if (!db.exists()) {
@@ -65,6 +69,16 @@ public class SuperiorGenerator extends JavaPlugin {
 
     @Override
     public void onDisable() {
+    }
+
+    private void loadAPI(){
+        try{
+            Field instance = SuperiorGeneratorAPI.class.getDeclaredField("instance");
+            instance.setAccessible(true);
+            instance.set(null, this);
+        }catch(Exception ex){
+            ex.printStackTrace();
+        }
     }
 
     public Config getConfiguration() {

@@ -1,7 +1,7 @@
 package fr.nivcoo.superiorgenerator.command;
 
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
-import fr.nivcoo.superiorgenerator.manager.Generator;
+import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import fr.nivcoo.utilsz.commands.Command;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -36,7 +36,7 @@ public interface CCommand extends Command {
 
     default List<String> getGeneratorsName() {
         List<String> generatorsName = new ArrayList<>();
-        for (Generator generator : SuperiorGenerator.get().getGeneratorManager().getAllGenerators()) {
+        for (AGenerator generator : SuperiorGenerator.get().getGeneratorManager().getAllGenerators()) {
             generatorsName.add(generator.getID());
         }
         return generatorsName;
@@ -44,7 +44,7 @@ public interface CCommand extends Command {
 
     default List<String> getUnlockedGeneratorsName(UUID islandUUID) {
         List<String> generatorsName = new ArrayList<>();
-        for (Generator generator : SuperiorGenerator.get().getCacheManager().getAllUnlockedGeneratorsOfIsland(islandUUID)) {
+        for (AGenerator generator : SuperiorGenerator.get().getCacheManager().getAllUnlockedGeneratorsOfIsland(islandUUID)) {
             generatorsName.add(generator.getID());
         }
         return generatorsName;
@@ -52,7 +52,7 @@ public interface CCommand extends Command {
 
     default List<String> getAllGeneratorsName() {
         List<String> generatorsName = new ArrayList<>();
-        for (Generator generator : SuperiorGenerator.get().getGeneratorManager().getAllGenerators()) {
+        for (AGenerator generator : SuperiorGenerator.get().getGeneratorManager().getAllGenerators()) {
             generatorsName.add(generator.getID());
         }
         return generatorsName;

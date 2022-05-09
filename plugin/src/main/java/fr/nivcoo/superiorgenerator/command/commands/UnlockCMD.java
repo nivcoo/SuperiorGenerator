@@ -6,8 +6,8 @@ import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
 import fr.nivcoo.superiorgenerator.command.CCommand;
 import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
-import fr.nivcoo.superiorgenerator.manager.Generator;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
+import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import fr.nivcoo.utilsz.config.Config;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -71,7 +71,7 @@ public class UnlockCMD implements CCommand {
             return;
         }
         String generatorID = args[2];
-        Generator generator = generatorManager.getGeneratorByID(generatorID);
+        AGenerator generator = generatorManager.getGeneratorByID(generatorID);
         if (generator == null) {
             sender.sendMessage(config.getString("messages.commands.unlock.not_found", generatorID));
             return;
