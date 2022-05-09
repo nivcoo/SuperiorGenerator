@@ -10,7 +10,7 @@ public class SuperiorGeneratorAPI {
     public static ASuperiorGenerator getSuperiorGenerator() {
         return instance;
     }
-
+    
     public AGeneratorManager getGeneratorManager() {
         return instance.getGeneratorManager();
     }
