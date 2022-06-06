@@ -1,10 +1,9 @@
 package fr.nivcoo.superiorgenerator.utils;
 
-import org.bukkit.entity.Player;
-
 import java.sql.*;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 public class Database {
     private String DBPath;
