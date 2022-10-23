@@ -5,7 +5,7 @@
 
     <groupId>fr.nivcoo</groupId>
     <artifactId>SuperiorGeneratorPlugin</artifactId>
-    <version>${global.version}</version>
+    <version>1.0.0</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>

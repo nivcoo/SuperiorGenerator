@@ -60,8 +60,10 @@ public class SuperiorSkyblock2 implements Listener {
     }
 
     public static void addBlockInIsland(Block block) {
+
         Island island = SuperiorSkyblockAPI.getIslandAt(block.getLocation());
         if (island != null)
             island.handleBlockPlace(block);
     }
+
 }
