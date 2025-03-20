@@ -5,14 +5,14 @@
 
     <groupId>fr.nivcoo</groupId>
     <artifactId>SuperiorGeneratorPlugin</artifactId>
-    <version>1.0.0</version>
+    <version>1.0.1</version>
     <packaging>pom</packaging>
 
     <name>${project.artifactId}</name>
     <url>https://maven.apache.org</url>
 
     <properties>
-        <global.version>1.0.0</global.version>
+        <global.version>1.0.1</global.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
@@ -24,13 +24,19 @@
     </modules>
 
     <repositories>
+
         <repository>
-            <id>bgsoftware</id>
-            <url>https://repo.bg-software.com/repository/api/</url>
+            <id>repo-local</id>
+            <url>file://${project.basedir}/libs</url>
         </repository>
+
         <repository>
             <id>papermc</id>
-            <url>https://papermc.io/repo/repository/maven-public/</url>
+            <url>https://repo.papermc.io/repository/maven-public/</url>
+        </repository>
+        <repository>
+            <id>bg-repo</id>
+            <url>https://repo.bg-software.com/repository/api/</url>
         </repository>
 
         <repository>
@@ -38,26 +44,20 @@
             <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
         </repository>
 
-        <repository>
-            <id>revolis</id>
-            <url>https://repo.revolis.fr/repository/minecraft/</url>
-        </repository>
     </repositories>
 
     <dependencies>
 
-        <!-- PaperMC API 1.13.2 -->
         <dependency>
-            <groupId>com.destroystokyo.paper</groupId>
+            <groupId>io.papermc.paper</groupId>
             <artifactId>paper-api</artifactId>
-            <version>1.13.2-R0.1-SNAPSHOT</version>
+            <version>1.20.6-R0.1-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
-
         <dependency>
             <groupId>fr.nivcoo</groupId>
             <artifactId>UtilsZ</artifactId>
-            <version>1.0.12</version>
+            <version>1.1.4</version>
             <scope>compile</scope>
         </dependency>
 
