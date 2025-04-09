@@ -22,9 +22,9 @@ public class BlockListener implements Listener {
 
 
     private SuperiorGenerator superiorGenerator;
-    private Config config;
-    private CacheManager cacheManager;
-    private GeneratorManager generatorManager;
+    private final Config config;
+    private final CacheManager cacheManager;
+    private final GeneratorManager generatorManager;
 
     public BlockListener() {
         superiorGenerator = SuperiorGenerator.get();
@@ -39,7 +39,7 @@ public class BlockListener implements Listener {
 
     private void generateRandomBlock(BlockState newState, UUID islandUUID) {
 
-        AGenerator generator = cacheManager.getCurrentIslandGenerator(islandUUID);
+        AGenerator generator = cacheManager.getOrUpdateCurrentIslandGenerator(islandUUID);
 
         Pair<Material, Byte> selectedBlock = generatorManager.getRandomBlock(generator);
 
@@ -66,7 +66,6 @@ public class BlockListener implements Listener {
         } else if (event.getNewState().getType() == Material.COBBLESTONE ||
                 (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_16) && event.getNewState().getType() == Material.getMaterial("BASALT") && enableBasaltGen))
             generateRandomBlock(event.getNewState(), islandUUID);
-
 
     }
 

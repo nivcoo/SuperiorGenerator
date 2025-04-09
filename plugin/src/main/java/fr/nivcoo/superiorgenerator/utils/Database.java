@@ -6,21 +6,40 @@ import java.util.List;
 import java.util.UUID;
 
 public class Database {
-    private String DBPath;
+    private final DatabaseType dbType;
+    private final String sqlitePath;
+    private final String host, database, username, password;
+    private final int port;
     private Connection connection = null;
     private Statement statement = null;
 
-    public Database(String dBPath) {
-        DBPath = dBPath;
+    public Database(DatabaseType dbType, String sqlitePath, String host, int port, String database, String username, String password) {
+        this.dbType = dbType;
+        this.sqlitePath = sqlitePath;
+        this.host = host;
+        this.port = port;
+        this.database = database;
+        this.username = username;
+        this.password = password;
     }
 
     public void connect() {
         try {
-            Class.forName("org.sqlite.JDBC");
-            if (connection == null || connection.isClosed())
-                connection = DriverManager.getConnection("jdbc:sqlite:" + DBPath);
+            if (dbType == DatabaseType.SQLITE) {
+                Class.forName("org.sqlite.JDBC");
+                if (connection == null || connection.isClosed())
+                    connection = DriverManager.getConnection("jdbc:sqlite:" + sqlitePath);
+            } else if (dbType == DatabaseType.MYSQL) {
+                Class.forName("com.mysql.cj.jdbc.Driver");
+                if (connection == null || connection.isClosed()) {
+                    String url = "jdbc:mysql://" + host + ":" + port + "/" + database + "?useSSL=false&serverTimezone=UTC";
+                    connection = DriverManager.getConnection(url, username, password);
+                }
+            }
+
             if (statement == null || statement.isClosed())
                 statement = connection.createStatement();
+
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
         }
@@ -38,16 +57,33 @@ public class Database {
 
     public void initDB() {
         connect();
-        query("CREATE TABLE IF NOT EXISTS active_generator (" + "island_uuid TEXT PRIMARY KEY, " + "generator_id TEXT DEFAULT 0 " + ")");
-        query("CREATE TABLE IF NOT EXISTS unlocked_generator (" + "island_uuid TEXT, " + "generator_id TEXT " + ")");
+        for (String query : getCreateTableStatements()) {
+            this.update(query);
+        }
         close();
 
     }
 
-    public void query(String request) {
+    public List<String> getCreateTableStatements() {
+        List<String> queries = new ArrayList<>();
+
+        if (dbType == DatabaseType.SQLITE) {
+            queries.add("CREATE TABLE IF NOT EXISTS active_generator (island_uuid TEXT PRIMARY KEY, generator_id TEXT DEFAULT 0)");
+            queries.add("CREATE TABLE IF NOT EXISTS unlocked_generator (island_uuid TEXT, generator_id TEXT)");
+        } else {
+            queries.add("CREATE TABLE IF NOT EXISTS active_generator (island_uuid VARCHAR(36) PRIMARY KEY, generator_id VARCHAR(64) DEFAULT '0')");
+            queries.add("CREATE TABLE IF NOT EXISTS unlocked_generator (island_uuid VARCHAR(36), generator_id VARCHAR(64), PRIMARY KEY (island_uuid, generator_id))");
+        }
+
+        return queries;
+    }
+
+
+    public void update(String request) {
         try {
-            statement.executeQuery(request);
-        } catch (SQLException ignored) {
+            statement.executeUpdate(request);
+        } catch (SQLException e) {
+            e.printStackTrace();
         }
     }
 

@@ -44,7 +44,7 @@ public class PlaceHolderAPI extends PlaceholderExpansion {
         GeneratorManager generatorManager = superiorGenerator.getGeneratorManager();
 
         if (identifier.equals("get_current_gen")) {
-            return String.valueOf(cacheManager.getCurrentIslandGenerator(player).getID());
+            return String.valueOf(cacheManager.getOrUpdateCurrentIslandGenerator(player).getID());
         } else if (identifier.equals("has_manage_permission")) {
 
             Island island = SuperiorSkyblock2.getIslandByMember(player);
@@ -54,7 +54,7 @@ public class PlaceHolderAPI extends PlaceholderExpansion {
         } else if (identifier.equals("get_current_category")) {
 
 
-            return String.valueOf(cacheManager.getCurrentIslandGenerator(player).getCategory());
+            return String.valueOf(cacheManager.getOrUpdateCurrentIslandGenerator(player).getCategory());
         } else if (identifier.startsWith("is_unlocked_")) {
             UUID islandUUID = SuperiorSkyblock2.getIslandUUIDByMember(player);
 

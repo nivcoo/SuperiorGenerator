@@ -8,6 +8,8 @@ import fr.nivcoo.superiorgenerator.listener.BlockListener;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.superiorgenerator.placeholder.PlaceHolderAPI;
 import fr.nivcoo.superiorgenerator.utils.Database;
+import fr.nivcoo.superiorgenerator.utils.DatabaseType;
+import fr.nivcoo.superiorgenerator.utils.RedisManager;
 import fr.nivcoo.superiorgeneratorapi.ASuperiorGenerator;
 import fr.nivcoo.superiorgeneratorapi.SuperiorGeneratorAPI;
 import fr.nivcoo.utilsz.commands.CommandManager;
@@ -18,6 +20,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 import java.io.File;
 import java.io.IOException;
 import java.lang.reflect.Field;
+import java.util.logging.Logger;
 
 public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator {
 
@@ -28,20 +31,40 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
     private GeneratorManager generatorManager;
     private CacheManager cacheManager;
     private CommandManager commandManager;
+    private RedisManager redisManager;
+    private final Logger log = getLogger();
 
     @Override
     public void onEnable() {
         INSTANCE = this;
         loadAPI();
         config = new Config(loadFile("config.yml"));
-        File db = new File(getDataFolder(), "database.db");
-        if (!db.exists()) {
-            try {
-                db.createNewFile();
-            } catch (IOException ignored) {
+
+
+        String type = config.getString("database.type").toLowerCase();
+        DatabaseType dbType = type.equals("mysql") ? DatabaseType.MYSQL : DatabaseType.SQLITE;
+
+        if (dbType == DatabaseType.SQLITE) {
+            File db = new File(getDataFolder(), config.getString("database.sqlite.path"));
+            if (!db.exists()) {
+                try {
+                    db.createNewFile();
+                } catch (IOException ignored) {
+                }
             }
+            database = new Database(dbType, db.getPath(), null, 0, null, null, null);
+        } else {
+            database = new Database(
+                    dbType,
+                    null,
+                    config.getString("database.mysql.host"),
+                    config.getInt("database.mysql.port"),
+                    config.getString("database.mysql.database"),
+                    config.getString("database.mysql.username"),
+                    config.getString("database.mysql.password")
+            );
         }
-        database = new Database(db.getPath());
+
         database.initDB();
 
 
@@ -64,19 +87,32 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
         commandManager.addCommand(new UnlockCMD());
         commandManager.addCommand(new SelectCMD());
 
-
+        if (config.getBoolean("redis.enabled")) {
+            redisManager = new RedisManager(
+                    this,
+                    config.getString("redis.host"),
+                    config.getInt("redis.port"),
+                    config.getString("redis.username"),
+                    config.getString("redis.password")
+            );
+            getLogger().info("Redis activé et connecté à " + config.getString("redis.host") + ":" + config.getInt("redis.port"));
+        } else {
+            getLogger().info("Redis désactivé dans la configuration.");
+        }
     }
 
     @Override
     public void onDisable() {
+
+        if (redisManager != null) redisManager.close();
     }
 
-    private void loadAPI(){
-        try{
+    private void loadAPI() {
+        try {
             Field instance = SuperiorGeneratorAPI.class.getDeclaredField("instance");
             instance.setAccessible(true);
             instance.set(null, this);
-        }catch(Exception ex){
+        } catch (Exception ex) {
             ex.printStackTrace();
         }
     }
@@ -112,6 +148,18 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
 
     public static SuperiorGenerator get() {
         return INSTANCE;
+    }
+
+    public RedisManager getRedisManager() {
+        return redisManager;
+    }
+
+    public boolean isRedisEnabled() {
+        return redisManager != null;
+    }
+
+    public Logger getLog() {
+        return log;
     }
 
 }
