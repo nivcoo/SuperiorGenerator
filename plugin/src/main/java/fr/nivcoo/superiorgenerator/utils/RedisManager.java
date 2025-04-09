@@ -71,7 +71,6 @@ public class RedisManager {
                 switch (action) {
                     case "select" -> {
                         plugin.getCacheManager().forceSelectGenerator(islandUUID, generator);
-                        System.out.println("Generator " + generator.getID() + " selected for island " + islandUUID);
                         plugin.getLog().info("Generator " + generator.getID() + " selected for island " + islandUUID);
                     }
                     case "unlock" -> {
@@ -100,21 +99,27 @@ public class RedisManager {
                 }
             }
         });
+        listenerThread.start();
     }
 
     public void close() {
         running = false;
         try {
             if (pubSub != null) {
-                pubSub.unsubscribe();
+                try {
+                    pubSub.unsubscribe();
+                } catch (Exception e) {
+                    plugin.getLogger().warning("[Redis] Failed to unsubscribe: " + e.getMessage());
+                }
             }
             if (listenerThread != null && listenerThread.isAlive()) {
                 listenerThread.join(50);
             }
         } catch (InterruptedException e) {
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         }
 
         jedisPool.close();
     }
+
 }
