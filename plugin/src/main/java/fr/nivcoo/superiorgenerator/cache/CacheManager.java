@@ -5,6 +5,7 @@ import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.superiorgenerator.utils.Database;
 import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
+import fr.nivcoo.utilsz.redis.RedisMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -113,7 +114,13 @@ public class CacheManager implements Listener {
         activeGenerators.put(islandUUID, generator);
         database.updateActiveGen(islandUUID, generator.getID());
         if (superiorGenerator.isRedisEnabled()) {
-            superiorGenerator.getRedisManager().publishSelect(islandUUID, generator.getID());
+            superiorGenerator.getRedisManager().publish(
+                    "superiorgenerator-update",
+                    new RedisMessage("select")
+                            .add("islandUUID", islandUUID)
+                            .add("generatorID", generator.getID())
+                            .toJson()
+            );
         }
         return true;
     }
@@ -131,7 +138,13 @@ public class CacheManager implements Listener {
 
         database.addOrEditUnlockedGenerator(islandUUID, generator.getID());
         if (superiorGenerator.isRedisEnabled()) {
-            superiorGenerator.getRedisManager().publishUnlock(islandUUID, generator.getID());
+            superiorGenerator.getRedisManager().publish(
+                    "superiorgenerator-update",
+                    new RedisMessage("unlock")
+                            .add("islandUUID", islandUUID)
+                            .add("generatorID", generator.getID())
+                            .toJson()
+            );
         }
         return true;
     }

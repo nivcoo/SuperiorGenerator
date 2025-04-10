@@ -7,13 +7,15 @@ import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
 import fr.nivcoo.superiorgenerator.listener.BlockListener;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.superiorgenerator.placeholder.PlaceHolderAPI;
+import fr.nivcoo.superiorgenerator.redis.GeneratorRedisMessage;
 import fr.nivcoo.superiorgenerator.utils.Database;
 import fr.nivcoo.superiorgenerator.utils.DatabaseType;
-import fr.nivcoo.superiorgenerator.utils.RedisManager;
 import fr.nivcoo.superiorgeneratorapi.ASuperiorGenerator;
 import fr.nivcoo.superiorgeneratorapi.SuperiorGeneratorAPI;
+import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import fr.nivcoo.utilsz.commands.CommandManager;
 import fr.nivcoo.utilsz.config.Config;
+import fr.nivcoo.utilsz.redis.RedisManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -95,9 +97,34 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
                     config.getString("redis.username"),
                     config.getString("redis.password")
             );
+            redisManager.start();
+
+            redisManager.subscribe("superiorgenerator-update", (channel, message) -> {
+
+            });
+
+            redisManager.registerAction("select", GeneratorRedisMessage::new, this::handleSelect);
+            redisManager.registerAction("unlock", GeneratorRedisMessage::new, this::handleUnlock);
+
             getLogger().info("Redis activé et connecté à " + config.getString("redis.host") + ":" + config.getInt("redis.port"));
         } else {
             getLogger().info("Redis désactivé dans la configuration.");
+        }
+    }
+
+    private void handleSelect(GeneratorRedisMessage msg) {
+        AGenerator generator = generatorManager.getGeneratorByID(msg.generatorID());
+        if (generator != null) {
+            cacheManager.forceSelectGenerator(msg.islandUUID(), generator);
+            log.info("Generator " + generator.getID() + " sélectionné pour l'île " + msg.islandUUID());
+        }
+    }
+
+    private void handleUnlock(GeneratorRedisMessage msg) {
+        AGenerator generator = generatorManager.getGeneratorByID(msg.generatorID());
+        if (generator != null) {
+            cacheManager.forceUnlockGenerator(msg.islandUUID(), generator);
+            log.info("Generator " + generator.getID() + " débloqué pour l'île " + msg.islandUUID());
         }
     }
 
