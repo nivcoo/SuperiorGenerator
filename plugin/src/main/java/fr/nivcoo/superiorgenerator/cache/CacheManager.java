@@ -3,6 +3,7 @@ package fr.nivcoo.superiorgenerator.cache;
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
+import fr.nivcoo.superiorgenerator.redis.GeneratorRedisMessage;
 import fr.nivcoo.superiorgenerator.utils.Database;
 import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import fr.nivcoo.utilsz.redis.RedisMessage;
@@ -114,12 +115,8 @@ public class CacheManager implements Listener {
         activeGenerators.put(islandUUID, generator);
         database.updateActiveGen(islandUUID, generator.getID());
         if (superiorGenerator.isRedisEnabled()) {
-            superiorGenerator.getRedisManager().publish(
-                    "superiorgenerator-update",
-                    new RedisMessage("select")
-                            .add("islandUUID", islandUUID)
-                            .add("generatorID", generator.getID())
-                            .toJson()
+            superiorGenerator.getTagChannel().publish(
+                    new GeneratorRedisMessage(islandUUID, generator.getID(), "select")
             );
         }
         return true;
@@ -138,12 +135,8 @@ public class CacheManager implements Listener {
 
         database.addOrEditUnlockedGenerator(islandUUID, generator.getID());
         if (superiorGenerator.isRedisEnabled()) {
-            superiorGenerator.getRedisManager().publish(
-                    "superiorgenerator-update",
-                    new RedisMessage("unlock")
-                            .add("islandUUID", islandUUID)
-                            .add("generatorID", generator.getID())
-                            .toJson()
+            superiorGenerator.getTagChannel().publish(
+                    new GeneratorRedisMessage(islandUUID, generator.getID(), "unlock")
             );
         }
         return true;

@@ -15,6 +15,7 @@ import fr.nivcoo.superiorgeneratorapi.SuperiorGeneratorAPI;
 import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import fr.nivcoo.utilsz.commands.CommandManager;
 import fr.nivcoo.utilsz.config.Config;
+import fr.nivcoo.utilsz.redis.RedisChannelRegistry;
 import fr.nivcoo.utilsz.redis.RedisManager;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -35,6 +36,8 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
     private CommandManager commandManager;
     private RedisManager redisManager;
     private final Logger log = getLogger();
+
+    RedisChannelRegistry tagChannel;
 
     @Override
     public void onEnable() {
@@ -99,12 +102,11 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
             );
             redisManager.start();
 
-            redisManager.subscribe("superiorgenerator-update", (channel, message) -> {
+            tagChannel = new RedisChannelRegistry(redisManager, "superiorgenerator-update");
 
-            });
+            tagChannel.register("select", GeneratorRedisMessage::new, this::handleSelect);
+            tagChannel.register("unlock", GeneratorRedisMessage::new, this::handleUnlock);
 
-            redisManager.registerAction("select", GeneratorRedisMessage::new, this::handleSelect);
-            redisManager.registerAction("unlock", GeneratorRedisMessage::new, this::handleUnlock);
 
             getLogger().info("Redis activé et connecté à " + config.getString("redis.host") + ":" + config.getInt("redis.port"));
         } else {
@@ -185,8 +187,8 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
         return redisManager != null;
     }
 
-    public Logger getLog() {
-        return log;
+    public RedisChannelRegistry getTagChannel() {
+        return tagChannel;
     }
 
 }

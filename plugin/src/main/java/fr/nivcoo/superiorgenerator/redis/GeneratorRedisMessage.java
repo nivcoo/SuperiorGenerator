@@ -16,6 +16,7 @@ public record GeneratorRedisMessage(UUID islandUUID, String generatorID, String 
         );
     }
 
+
     @Override
     public String getAction() {
         return action;
