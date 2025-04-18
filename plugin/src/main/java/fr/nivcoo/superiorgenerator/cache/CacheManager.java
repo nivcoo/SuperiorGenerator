@@ -1,12 +1,12 @@
 package fr.nivcoo.superiorgenerator.cache;
 
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
+import fr.nivcoo.superiorgenerator.actions.SelectAction;
+import fr.nivcoo.superiorgenerator.actions.UnlockAction;
 import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
-import fr.nivcoo.superiorgenerator.redis.GeneratorRedisMessage;
 import fr.nivcoo.superiorgenerator.utils.Database;
 import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
-import fr.nivcoo.utilsz.redis.RedisMessage;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -115,9 +115,7 @@ public class CacheManager implements Listener {
         activeGenerators.put(islandUUID, generator);
         database.updateActiveGen(islandUUID, generator.getID());
         if (superiorGenerator.isRedisEnabled()) {
-            superiorGenerator.getTagChannel().publish(
-                    new GeneratorRedisMessage(islandUUID, generator.getID(), "select")
-            );
+            superiorGenerator.getTagChannel().publish(new SelectAction(islandUUID, generator.getID()));
         }
         return true;
     }
@@ -135,9 +133,7 @@ public class CacheManager implements Listener {
 
         database.addOrEditUnlockedGenerator(islandUUID, generator.getID());
         if (superiorGenerator.isRedisEnabled()) {
-            superiorGenerator.getTagChannel().publish(
-                    new GeneratorRedisMessage(islandUUID, generator.getID(), "unlock")
-            );
+            superiorGenerator.getTagChannel().publish(new UnlockAction(islandUUID, generator.getID()));
         }
         return true;
     }

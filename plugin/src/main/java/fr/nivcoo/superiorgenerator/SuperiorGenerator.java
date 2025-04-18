@@ -1,5 +1,7 @@
 package fr.nivcoo.superiorgenerator;
 
+import fr.nivcoo.superiorgenerator.actions.SelectAction;
+import fr.nivcoo.superiorgenerator.actions.UnlockAction;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
 import fr.nivcoo.superiorgenerator.command.commands.SelectCMD;
 import fr.nivcoo.superiorgenerator.command.commands.UnlockCMD;
@@ -7,12 +9,10 @@ import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
 import fr.nivcoo.superiorgenerator.listener.BlockListener;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.superiorgenerator.placeholder.PlaceHolderAPI;
-import fr.nivcoo.superiorgenerator.redis.GeneratorRedisMessage;
 import fr.nivcoo.superiorgenerator.utils.Database;
 import fr.nivcoo.superiorgenerator.utils.DatabaseType;
 import fr.nivcoo.superiorgeneratorapi.ASuperiorGenerator;
 import fr.nivcoo.superiorgeneratorapi.SuperiorGeneratorAPI;
-import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import fr.nivcoo.utilsz.commands.CommandManager;
 import fr.nivcoo.utilsz.config.Config;
 import fr.nivcoo.utilsz.redis.RedisChannelRegistry;
@@ -100,33 +100,16 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
                     config.getString("redis.username"),
                     config.getString("redis.password")
             );
-            redisManager.start();
 
-            tagChannel = new RedisChannelRegistry(redisManager, "superiorgenerator-update");
+            tagChannel = redisManager.createRegistry("superiorgenerator-update");
 
-            tagChannel.register("select", GeneratorRedisMessage::new, this::handleSelect);
-            tagChannel.register("unlock", GeneratorRedisMessage::new, this::handleUnlock);
+            tagChannel.register(SelectAction.class);
+            tagChannel.register(UnlockAction.class);
 
 
             getLogger().info("Redis activé et connecté à " + config.getString("redis.host") + ":" + config.getInt("redis.port"));
         } else {
             getLogger().info("Redis désactivé dans la configuration.");
-        }
-    }
-
-    private void handleSelect(GeneratorRedisMessage msg) {
-        AGenerator generator = generatorManager.getGeneratorByID(msg.generatorID());
-        if (generator != null) {
-            cacheManager.forceSelectGenerator(msg.islandUUID(), generator);
-            log.info("Generator " + generator.getID() + " sélectionné pour l'île " + msg.islandUUID());
-        }
-    }
-
-    private void handleUnlock(GeneratorRedisMessage msg) {
-        AGenerator generator = generatorManager.getGeneratorByID(msg.generatorID());
-        if (generator != null) {
-            cacheManager.forceUnlockGenerator(msg.islandUUID(), generator);
-            log.info("Generator " + generator.getID() + " débloqué pour l'île " + msg.islandUUID());
         }
     }
 
