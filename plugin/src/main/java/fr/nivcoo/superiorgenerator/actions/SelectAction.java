@@ -14,10 +14,6 @@ import java.util.UUID;
 @RedisAction("select")
 public record SelectAction(UUID islandUUID, String generatorID) implements RedisSerializable {
 
-    public JsonObject toJson() {
-        return new RedisMessage(getAction()).add("islandUUID", islandUUID).add("generatorID", generatorID).toJson();
-    }
-
     @Override
     public void execute() {
 

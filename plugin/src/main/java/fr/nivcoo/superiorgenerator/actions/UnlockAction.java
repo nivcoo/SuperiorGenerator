@@ -14,10 +14,6 @@ import java.util.UUID;
 @RedisAction("unlock")
 public record UnlockAction(UUID islandUUID, String generatorID) implements RedisSerializable {
 
-    public JsonObject toJson() {
-        return new RedisMessage(getAction()).add("islandUUID", islandUUID).add("generatorID", generatorID).toJson();
-    }
-
     @Override
     public void execute() {
         SuperiorGenerator plugin = SuperiorGenerator.get();
