@@ -15,27 +15,6 @@
 
     <name>${project.artifactId}</name>
 
-    <repositories>
-        <repository>
-            <id>repo-local</id>
-            <url>file://${project.basedir}/libs</url>
-        </repository>
-        <repository>
-            <id>papermc</id>
-            <url>https://repo.papermc.io/repository/maven-public/</url>
-        </repository>
-        <repository>
-            <id>bg-repo</id>
-            <url>https://repo.bg-software.com/repository/api/</url>
-        </repository>
-
-        <repository>
-            <id>placeholderapi</id>
-            <url>https://repo.extendedclip.com/content/repositories/placeholderapi/</url>
-        </repository>
-
-    </repositories>
-
     <dependencies>
 
         <dependency>
@@ -57,14 +36,6 @@
             <version>1.0.0</version>
             <scope>compile</scope>
         </dependency>
-
-        <dependency>
-            <groupId>fr.nivcoo</groupId>
-            <artifactId>UtilsZ</artifactId>
-            <version>1.1.21</version>
-            <scope>compile</scope>
-        </dependency>
-
 
     </dependencies>
 
