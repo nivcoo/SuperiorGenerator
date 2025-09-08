@@ -1,5 +1,7 @@
 package fr.nivcoo.superiorgenerator.utils;
 
+import fr.nivcoo.utilsz.database.DatabaseType;
+
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
