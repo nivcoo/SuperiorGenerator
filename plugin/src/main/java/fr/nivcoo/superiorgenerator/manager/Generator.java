@@ -5,14 +5,15 @@ import fr.nivcoo.utilsz.config.Pair;
 import org.bukkit.Material;
 
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 
 public class Generator implements AGenerator {
 
     String id;
     String category;
-    HashMap<Pair<Material, Byte>, Double> blocks;
+    LinkedHashMap<Pair<Material, Byte>, Double> blocks;
 
-    public Generator(String id, String category, HashMap<Pair<Material, Byte>, Double> blocks) {
+    public Generator(String id, String category, LinkedHashMap<Pair<Material, Byte>, Double> blocks) {
         this.id = id;
         this.category = category;
         this.blocks = blocks;
