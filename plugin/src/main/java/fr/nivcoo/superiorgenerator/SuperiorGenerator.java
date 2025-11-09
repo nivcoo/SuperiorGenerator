@@ -117,6 +117,7 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
 
     @Override
     public void onDisable() {
+        if (redisBus != null) redisBus.close();
         if (redisManager != null) redisManager.close();
         if (databaseManager != null) databaseManager.closeConnection();
     }
@@ -162,10 +163,6 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
 
     public static SuperiorGenerator get() {
         return INSTANCE;
-    }
-
-    public boolean isRedisEnabled() {
-        return redisManager != null;
     }
 
     public RedisChannelBus getRedisBus() {
