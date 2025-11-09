@@ -16,8 +16,10 @@ import fr.nivcoo.utilsz.commands.CommandManager;
 import fr.nivcoo.utilsz.config.Config;
 import fr.nivcoo.utilsz.database.DatabaseManager;
 import fr.nivcoo.utilsz.database.DatabaseType;
-import fr.nivcoo.utilsz.redis.RedisChannelRegistry;
 import fr.nivcoo.utilsz.redis.RedisManager;
+import fr.nivcoo.utilsz.redis.bus.RedisChannelBus;
+import fr.nivcoo.utilsz.redis.bus.RedisChannelBusImpl;
+import fr.nivcoo.utilsz.redis.bus.RedisChannelBusNoop;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -40,7 +42,7 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
     private RedisManager redisManager;
     private final Logger log = getLogger();
 
-    RedisChannelRegistry tagChannel;
+    private RedisChannelBus redisBus;
 
     @Override
     public void onEnable() {
@@ -101,12 +103,14 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
                     config.getString("redis.password")
             );
 
-            tagChannel = redisManager.createRegistry("superiorgenerator-update");
-            tagChannel.register(SelectAction.class);
-            tagChannel.register(UnlockAction.class);
+            redisBus = new RedisChannelBusImpl(redisManager, "edendonjon");
+
+            redisBus.register(SelectAction.class);
+            redisBus.register(UnlockAction.class);
 
             getLogger().info("Redis activé et connecté à " + config.getString("redis.host") + ":" + config.getInt("redis.port"));
         } else {
+            redisBus = new RedisChannelBusNoop();
             getLogger().info("Redis désactivé dans la configuration.");
         }
     }
@@ -144,10 +148,6 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
         return database;
     }
 
-    public DatabaseManager getDatabaseManager() {
-        return databaseManager;
-    }
-
     public SuperiorSkyblock2 getSuperiorSkyblock2() {
         return superiorSkyblock2;
     }
@@ -164,15 +164,11 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
         return INSTANCE;
     }
 
-    public RedisManager getRedisManager() {
-        return redisManager;
-    }
-
     public boolean isRedisEnabled() {
         return redisManager != null;
     }
 
-    public RedisChannelRegistry getTagChannel() {
-        return tagChannel;
+    public RedisChannelBus getRedisBus() {
+        return redisBus;
     }
 }

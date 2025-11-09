@@ -114,9 +114,7 @@ public class CacheManager implements Listener {
         if (gen == generator) return false;
         activeGenerators.put(islandUUID, generator);
         database.updateActiveGen(islandUUID, generator.getID());
-        if (superiorGenerator.isRedisEnabled()) {
-            superiorGenerator.getTagChannel().publish(new SelectAction(islandUUID, generator.getID()));
-        }
+        superiorGenerator.getRedisBus().publish(new SelectAction(islandUUID, generator.getID()));
         return true;
     }
 
@@ -132,9 +130,7 @@ public class CacheManager implements Listener {
         unlockedGenerators.put(islandUUID, unlockedGenerator);
 
         database.addOrEditUnlockedGenerator(islandUUID, generator.getID());
-        if (superiorGenerator.isRedisEnabled()) {
-            superiorGenerator.getTagChannel().publish(new UnlockAction(islandUUID, generator.getID()));
-        }
+        superiorGenerator.getRedisBus().publish(new UnlockAction(islandUUID, generator.getID()));
         return true;
     }
 
