@@ -2,7 +2,6 @@ package fr.nivcoo.superiorgenerator.listener;
 
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
-import fr.nivcoo.superiorgenerator.hook.platform.SuperiorHook;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import fr.nivcoo.superiorgeneratorapi.manager.GeneratorBlock;
@@ -34,12 +33,15 @@ public class BlockListener implements Listener {
 
         newState.setType(selectedBlock.material());
         newState.update(true);
-        SuperiorHook.addBlockInIsland(newState.getBlock());
+        superiorGenerator.islands().handleBlockPlace(newState.getBlock());
     }
 
     @EventHandler
     public void onBlockFormEvent(BlockFormEvent event) {
-        UUID islandUUID = SuperiorHook.getIslandUUIDByLocation(event.getNewState().getLocation());
+        UUID islandUUID = superiorGenerator.islands()
+                .islandAt(event.getNewState().getLocation())
+                .map(island -> island.uuid())
+                .orElse(null);
         if (islandUUID == null) return;
 
         boolean enableBasaltGen = superiorGenerator.getConfiguration().enableBasaltGenerator;

@@ -1,22 +1,20 @@
 package fr.nivcoo.superiorgenerator.hook.platform;
 
 import com.bgsoftware.superiorskyblock.api.SuperiorSkyblockAPI;
-import com.bgsoftware.superiorskyblock.api.events.PluginInitializeEvent;
 import com.bgsoftware.superiorskyblock.api.island.Island;
 import com.bgsoftware.superiorskyblock.api.island.IslandPrivilege;
 import com.bgsoftware.superiorskyblock.api.wrappers.SuperiorPlayer;
 import fr.nivcoo.superiorgenerator.hook.core.HookContext;
+import fr.nivcoo.superiorgenerator.service.IslandService;
 import fr.nivcoo.utilsz.platform.bukkit.hook.ListenerBukkitHook;
 import org.bukkit.Location;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
-import org.bukkit.event.EventHandler;
 
+import java.util.Optional;
 import java.util.UUID;
 
 public final class SuperiorHook extends ListenerBukkitHook<HookContext> {
-
-    private static IslandPrivilege manageGenerator;
 
     public SuperiorHook(HookContext context) {
     }
@@ -31,38 +29,59 @@ public final class SuperiorHook extends ListenerBukkitHook<HookContext> {
         return "SuperiorSkyblock2";
     }
 
-    @EventHandler
-    public void init(PluginInitializeEvent event) {
-        IslandPrivilege.register("MANAGE_GENERATOR");
-        manageGenerator = IslandPrivilege.getByName("MANAGE_GENERATOR");
+    @Override
+    protected void onLoad(HookContext context) {
+        registerPrivilege(IslandService.MANAGE_GENERATOR_PERMISSION);
+        context.plugin().islands().resolver(new IslandService.IslandResolver() {
+            @Override
+            public Optional<IslandService.IslandInfo> islandAt(Location location) {
+                Island island = SuperiorSkyblockAPI.getIslandAt(location);
+                return island == null ? Optional.empty() : Optional.of(new IslandService.IslandInfo(island.getUniqueId(), island.isSpawn()));
+            }
+
+            @Override
+            public Optional<IslandService.IslandInfo> islandByMember(Player player) {
+                if (player == null) return Optional.empty();
+                SuperiorPlayer superiorPlayer = SuperiorSkyblockAPI.getPlayer(player);
+                if (superiorPlayer == null) return Optional.empty();
+                Island island = superiorPlayer.getIsland();
+                return island == null ? Optional.empty() : Optional.of(new IslandService.IslandInfo(island.getUniqueId(), island.isSpawn()));
+            }
+
+            @Override
+            public boolean hasPermission(Player player, UUID islandUuid, String permission) {
+                if (player == null || islandUuid == null || permission == null || permission.isBlank()) return false;
+                Island island = SuperiorSkyblockAPI.getIslandByUUID(islandUuid);
+                if (island == null) return false;
+                SuperiorPlayer superiorPlayer = SuperiorSkyblockAPI.getPlayer(player);
+                if (superiorPlayer == null) return false;
+                IslandPrivilege privilege = privilege(permission);
+                return privilege != null && island.hasPermission(superiorPlayer, privilege);
+            }
+
+            @Override
+            public void handleBlockPlace(Block block) {
+                if (block == null) return;
+                Island island = SuperiorSkyblockAPI.getIslandAt(block.getLocation());
+                if (island != null) island.handleBlockPlace(block);
+            }
+        });
     }
 
-    public static IslandPrivilege getManageGeneratorPermission() {
-        if (manageGenerator == null) {
-            manageGenerator = IslandPrivilege.getByName("MANAGE_GENERATOR");
+    private void registerPrivilege(String permission) {
+        if (permission == null || permission.isBlank()) return;
+        if (privilege(permission) != null) return;
+        try {
+            IslandPrivilege.register(permission, IslandPrivilege.Type.ACTION);
+        } catch (RuntimeException ignored) {
         }
-        return manageGenerator;
     }
 
-    public static UUID getIslandUUIDByMember(Player player) {
-        Island island = getIslandByMember(player);
-        return island == null ? null : island.getUniqueId();
-    }
-
-    public static Island getIslandByMember(Player player) {
-        SuperiorPlayer superiorPlayer = SuperiorSkyblockAPI.getPlayer(player);
-        return superiorPlayer == null ? null : superiorPlayer.getIsland();
-    }
-
-    public static UUID getIslandUUIDByLocation(Location location) {
-        Island island = SuperiorSkyblockAPI.getIslandAt(location);
-        return island == null ? null : island.getUniqueId();
-    }
-
-    public static void addBlockInIsland(Block block) {
-        Island island = SuperiorSkyblockAPI.getIslandAt(block.getLocation());
-        if (island != null) {
-            island.handleBlockPlace(block);
+    private IslandPrivilege privilege(String permission) {
+        try {
+            return IslandPrivilege.getByName(permission);
+        } catch (RuntimeException ignored) {
+            return null;
         }
     }
 }

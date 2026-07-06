@@ -1,11 +1,10 @@
 package fr.nivcoo.superiorgenerator.command;
 
-import com.bgsoftware.superiorskyblock.api.island.Island;
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
 import fr.nivcoo.superiorgenerator.config.MessagesConfig;
-import fr.nivcoo.superiorgenerator.hook.platform.SuperiorHook;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
+import fr.nivcoo.superiorgenerator.service.IslandService;
 import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import fr.nivcoo.utilsz.core.config.ConfigManager;
 import fr.nivcoo.utilsz.platform.bukkit.commands.BukkitCommand;
@@ -70,7 +69,7 @@ public class UnlockCommand implements BukkitCommand {
             sender.sendMessage(fmt(messages.notFoundPlayer, "player", args[1]));
             return;
         }
-        Island island = SuperiorHook.getIslandByMember(player);
+        IslandService.IslandInfo island = plugin.islands().islandByMember(player).orElse(null);
         if (island == null) {
             sender.sendMessage(fmt(messages.noIsland, "player", player.getName()));
             return;
@@ -82,7 +81,7 @@ public class UnlockCommand implements BukkitCommand {
             return;
         }
 
-        UUID islandUUID = island.getUniqueId();
+        UUID islandUUID = island.uuid();
         Component returnMessage;
         if (cacheManager.unlockGenerator(islandUUID, generator)) {
             returnMessage = fmt(messages.success, "generator", generatorID, "player", player.getName());

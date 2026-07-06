@@ -1,11 +1,10 @@
 package fr.nivcoo.superiorgenerator.command;
 
-import com.bgsoftware.superiorskyblock.api.island.Island;
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
 import fr.nivcoo.superiorgenerator.config.MessagesConfig;
-import fr.nivcoo.superiorgenerator.hook.platform.SuperiorHook;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
+import fr.nivcoo.superiorgenerator.service.IslandService;
 import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import fr.nivcoo.utilsz.core.config.ConfigManager;
 import fr.nivcoo.utilsz.platform.bukkit.commands.BukkitCommand;
@@ -80,19 +79,19 @@ public class SelectCommand implements BukkitCommand {
         CacheManager cacheManager = plugin.getCacheManager();
         String generatorID = args[1];
         AGenerator generator = generatorManager.getGeneratorByID(generatorID);
-        Island island = SuperiorHook.getIslandByMember(player);
+        IslandService.IslandInfo island = plugin.islands().islandByMember(player).orElse(null);
 
         if (island == null) {
             sender.sendMessage(selectForOtherIsland ? messages.other.noIsland : messages.noIsland);
             return;
         }
 
-        if (!selectForOtherIsland && !island.hasPermission(player, SuperiorHook.getManageGeneratorPermission())) {
+        if (!selectForOtherIsland && !plugin.islands().hasPermission(player, island.uuid(), IslandService.MANAGE_GENERATOR_PERMISSION)) {
             sender.sendMessage(messages.noPermission);
             return;
         }
 
-        UUID islandUUID = island.getUniqueId();
+        UUID islandUUID = island.uuid();
         Component returnMessage;
         if (cacheManager.isAlreadyUnlocked(islandUUID, generator)) {
             if (cacheManager.selectIslandGenerator(islandUUID, generator)) {
@@ -113,7 +112,10 @@ public class SelectCommand implements BukkitCommand {
             if (args.length == 2) return getAllGeneratorsName();
             if (args.length == 3) return getOnlinePlayersNames();
         } else if (args.length == 2 && sender instanceof Player player) {
-            UUID islandUUID = SuperiorHook.getIslandUUIDByMember(player);
+            UUID islandUUID = SuperiorGenerator.get().islands()
+                    .islandByMember(player)
+                    .map(island -> island.uuid())
+                    .orElse(null);
             return getUnlockedGeneratorsName(islandUUID);
         }
         return new ArrayList<>();

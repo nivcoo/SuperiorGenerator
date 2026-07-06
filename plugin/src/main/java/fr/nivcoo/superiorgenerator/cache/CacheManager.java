@@ -1,7 +1,6 @@
 package fr.nivcoo.superiorgenerator.cache;
 
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
-import fr.nivcoo.superiorgenerator.hook.platform.SuperiorHook;
 import fr.nivcoo.superiorgenerator.messaging.action.SelectAction;
 import fr.nivcoo.superiorgenerator.messaging.action.UnlockAction;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
@@ -81,7 +80,11 @@ public class CacheManager implements Listener {
     }
 
     private AGenerator getOrUpdateCurrentIslandGenerator(Player p, boolean forceUpdate) {
-        return getOrUpdateCurrentIslandGenerator(SuperiorHook.getIslandUUIDByMember(p), forceUpdate);
+        UUID islandUuid = superiorGenerator.islands()
+                .islandByMember(p)
+                .map(island -> island.uuid())
+                .orElse(null);
+        return getOrUpdateCurrentIslandGenerator(islandUuid, forceUpdate);
     }
 
     public AGenerator getOrUpdateCurrentIslandGenerator(UUID islandUUID) {

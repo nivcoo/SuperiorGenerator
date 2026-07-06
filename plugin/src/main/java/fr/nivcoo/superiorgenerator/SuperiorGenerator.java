@@ -13,6 +13,7 @@ import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.superiorgenerator.messaging.action.SelectAction;
 import fr.nivcoo.superiorgenerator.messaging.action.UnlockAction;
 import fr.nivcoo.superiorgenerator.placeholder.PlaceHolderAPI;
+import fr.nivcoo.superiorgenerator.service.IslandService;
 import fr.nivcoo.superiorgenerator.storage.Database;
 import fr.nivcoo.superiorgeneratorapi.ASuperiorGenerator;
 import fr.nivcoo.superiorgeneratorapi.SuperiorGeneratorAPI;
@@ -42,6 +43,7 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
     private DatabaseManager databaseManager;
     private Database database;
     private HookContext hookContext;
+    private IslandService islandService;
     private GeneratorManager generatorManager;
     private CacheManager cacheManager;
     private MessageBus messageBus;
@@ -61,6 +63,7 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
             getLogger().warning("SuperiorGenerator: table init error: " + e.getMessage());
         }
 
+        islandService = new IslandService();
         setupHooks();
 
         generatorManager = new GeneratorManager();
@@ -145,6 +148,10 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
 
     public MessageBus getMessageBus() {
         return messageBus;
+    }
+
+    public IslandService islands() {
+        return islandService;
     }
 
     public static SuperiorGenerator get() {
