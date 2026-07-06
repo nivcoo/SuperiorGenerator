@@ -4,6 +4,7 @@ import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.messaging.action.SelectAction;
 import fr.nivcoo.superiorgenerator.messaging.action.UnlockAction;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
+import fr.nivcoo.superiorgenerator.service.IslandService;
 import fr.nivcoo.superiorgenerator.storage.Database;
 import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import org.bukkit.Bukkit;
@@ -15,6 +16,7 @@ import org.bukkit.event.player.PlayerJoinEvent;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -34,105 +36,87 @@ public class CacheManager implements Listener {
         generatorManager = superiorGenerator.getGeneratorManager();
         unlockedGenerators = new HashMap<>();
         activeGenerators = new HashMap<>();
-        updateAllConnectedPlayers();
+        load();
     }
 
-    public void updateAllConnectedPlayers() {
-        for (Player p : Bukkit.getServer().getOnlinePlayers()) {
-            getOrUpdateCurrentIslandGenerator(p);
-        }
-    }
+    public void load() {
+        unlockedGenerators.clear();
+        activeGenerators.clear();
 
-
-    void updateUnlockedGenerator(UUID islandUUID) {
-
-        List<String> unlockedGeneratorsID = database.getAllUnlockedIslandGeneratorID(islandUUID);
-        List<AGenerator> generators = new ArrayList<>();
-
-        for (String unlockedGeneratorID : unlockedGeneratorsID) {
-            AGenerator generator = generatorManager.getGeneratorByID(unlockedGeneratorID);
-            if (generator != null) generators.add(generator);
+        for (Map.Entry<UUID, List<String>> entry : database.loadUnlockedGenerators().entrySet()) {
+            List<AGenerator> generators = new ArrayList<>();
+            for (String generatorID : entry.getValue()) {
+                AGenerator generator = generatorManager.getGeneratorByID(generatorID);
+                if (generator != null) generators.add(generator);
+            }
+            unlockedGenerators.put(entry.getKey(), generators);
         }
 
-        unlockedGenerators.put(islandUUID, generators);
+        for (Map.Entry<UUID, String> entry : database.loadActiveGenerators().entrySet()) {
+            AGenerator generator = generatorManager.getGeneratorByID(entry.getValue());
+            if (generator != null) {
+                activeGenerators.put(entry.getKey(), generator);
+            }
+        }
 
+        Bukkit.getLogger().info("[SuperiorGenerator] Loaded " + activeGenerators.size() + " active generators and " + unlockedGenerators.size() + " unlocked islands in cache.");
     }
 
     public void forceSelectGenerator(UUID islandUUID, AGenerator generator) {
+        if (islandUUID == null) return;
         if (generator == null) return;
-        if (!activeGenerators.containsKey(islandUUID)) return;
         activeGenerators.put(islandUUID, generator);
     }
 
     public void forceUnlockGenerator(UUID islandUUID, AGenerator generator) {
+        if (islandUUID == null) return;
         if (generator == null) return;
-        if (!unlockedGenerators.containsKey(islandUUID)) return;
 
-        List<AGenerator> unlocked = unlockedGenerators.get(islandUUID);
+        List<AGenerator> unlocked = unlockedGenerators.computeIfAbsent(islandUUID, ignored -> new ArrayList<>());
 
         if (!unlocked.contains(generator)) {
             unlocked.add(generator);
         }
+        activeGenerators.put(islandUUID, generator);
     }
 
-    public AGenerator getOrUpdateCurrentIslandGenerator(Player p) {
-        return getOrUpdateCurrentIslandGenerator(p, false);
-    }
-
-    private AGenerator getOrUpdateCurrentIslandGenerator(Player p, boolean forceUpdate) {
+    public AGenerator getCurrentIslandGenerator(Player p) {
         UUID islandUuid = superiorGenerator.islands()
                 .islandByMember(p)
-                .map(island -> island.uuid())
+                .map(IslandService.IslandInfo::uuid)
                 .orElse(null);
-        return getOrUpdateCurrentIslandGenerator(islandUuid, forceUpdate);
+        return getCurrentIslandGenerator(islandUuid);
     }
 
-    public AGenerator getOrUpdateCurrentIslandGenerator(UUID islandUUID) {
-        return getOrUpdateCurrentIslandGenerator(islandUUID, false);
-    }
-
-
-    public AGenerator getOrUpdateCurrentIslandGenerator(UUID islandUUID, boolean forceUpdate) {
+    public AGenerator getCurrentIslandGenerator(UUID islandUUID) {
         if (islandUUID == null) return generatorManager.getDefaultGenerator();
-
-        AGenerator generator = activeGenerators.get(islandUUID);
-        boolean hasUnlocked = unlockedGenerators.containsKey(islandUUID);
-
-        if (generator != null && !forceUpdate && hasUnlocked) return generator;
-
-        String generatorUUID = database.getCurrentIslandGeneratorID(islandUUID);
-        AGenerator activeGenerator = generatorManager.getGeneratorByID(generatorUUID);
-        if (activeGenerator == null) activeGenerator = generatorManager.getDefaultGenerator();
-
-        activeGenerators.put(islandUUID, activeGenerator);
-
-        if (!hasUnlocked) updateUnlockedGenerator(islandUUID);
-
-        return activeGenerator;
+        return activeGenerators.getOrDefault(islandUUID, generatorManager.getDefaultGenerator());
     }
-
 
     public boolean selectIslandGenerator(UUID islandUUID, AGenerator generator) {
+        if (islandUUID == null || generator == null) return false;
         AGenerator gen = activeGenerators.get(islandUUID);
         if (gen == generator) return false;
+        if (!database.saveActiveGenerator(islandUUID, generator.getID())) return false;
+
         activeGenerators.put(islandUUID, generator);
-        database.updateActiveGen(islandUUID, generator.getID());
         superiorGenerator.getMessageBus().publish(new SelectAction(islandUUID, generator.getID()));
         return true;
     }
 
     public boolean unlockGenerator(UUID islandUUID, AGenerator generator) {
-        if (generator == null || generator.getID().equals("default")) return false;
+        if (islandUUID == null || generator == null || generator.getID().equals("default")) return false;
 
         List<AGenerator> unlockedGenerator = unlockedGenerators.get(islandUUID);
         if (unlockedGenerator == null) unlockedGenerator = new ArrayList<>();
 
         if (unlockedGenerator.contains(generator)) return false;
+        if (!database.addOrEditUnlockedGenerator(islandUUID, generator.getID())) return false;
 
         unlockedGenerator.add(generator);
         unlockedGenerators.put(islandUUID, unlockedGenerator);
+        activeGenerators.put(islandUUID, generator);
 
-        database.addOrEditUnlockedGenerator(islandUUID, generator.getID());
         superiorGenerator.getMessageBus().publish(new UnlockAction(islandUUID, generator.getID()));
         return true;
     }
@@ -142,20 +126,21 @@ public class CacheManager implements Listener {
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
 
-        getOrUpdateCurrentIslandGenerator(p);
+        getCurrentIslandGenerator(p);
 
     }
 
     public boolean isAlreadyUnlocked(UUID islandUUID, AGenerator generator) {
+        if (generator == null) return false;
+        if (generator.getID().equals("default")) return true;
         List<AGenerator> generators = unlockedGenerators.get(islandUUID);
-        if (generators == null || generator == null) return false;
+        if (generators == null) return false;
 
-        return generators.contains(generator) || generator.getID().equals("default");
+        return generators.contains(generator);
     }
 
     public List<AGenerator> getAllUnlockedGeneratorsOfIsland(UUID islandUUID) {
-        List<AGenerator> generators = unlockedGenerators.get(islandUUID);
-        if (generators == null) generators = new ArrayList<>();
+        List<AGenerator> generators = new ArrayList<>(unlockedGenerators.getOrDefault(islandUUID, List.of()));
         AGenerator defaultGenerator = generatorManager.getDefaultGenerator();
         if (!generators.contains(defaultGenerator)) generators.add(defaultGenerator);
         return generators;

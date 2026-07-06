@@ -48,7 +48,7 @@ public class PlaceHolderAPI extends PlaceholderExpansion {
         GeneratorManager generatorManager = superiorGenerator.getGeneratorManager();
 
         if (identifier.equals("get_current_gen")) {
-            return String.valueOf(cacheManager.getOrUpdateCurrentIslandGenerator(player).getID());
+            return String.valueOf(cacheManager.getCurrentIslandGenerator(player).getID());
         } else if (identifier.equals("has_manage_permission")) {
 
             return String.valueOf(superiorGenerator.islands()
@@ -58,7 +58,7 @@ public class PlaceHolderAPI extends PlaceholderExpansion {
         } else if (identifier.equals("get_current_category")) {
 
 
-            return String.valueOf(cacheManager.getOrUpdateCurrentIslandGenerator(player).getCategory());
+            return String.valueOf(cacheManager.getCurrentIslandGenerator(player).getCategory());
         } else if (identifier.startsWith("is_unlocked_")) {
             UUID islandUUID = superiorGenerator.islands()
                     .islandByMember(player)

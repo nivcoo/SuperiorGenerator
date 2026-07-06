@@ -28,7 +28,7 @@ public class BlockListener implements Listener {
     }
 
     private void generateRandomBlock(BlockState newState, UUID islandUUID) {
-        AGenerator generator = cacheManager.getOrUpdateCurrentIslandGenerator(islandUUID);
+        AGenerator generator = cacheManager.getCurrentIslandGenerator(islandUUID);
         GeneratorBlock selectedBlock = generatorManager.getRandomBlock(generator);
 
         newState.setType(selectedBlock.material());
