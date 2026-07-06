@@ -1,18 +1,23 @@
 package fr.nivcoo.superiorgeneratorapi;
 
 
-import fr.nivcoo.superiorgeneratorapi.manager.AGeneratorManager;
+public final class SuperiorGeneratorAPI {
 
-public class SuperiorGeneratorAPI {
+    private static ASuperiorGenerator api;
 
-    private static ASuperiorGenerator instance;
+    private SuperiorGeneratorAPI() {
+    }
+
+    public static ASuperiorGenerator get() {
+        return api;
+    }
 
     public static ASuperiorGenerator getSuperiorGenerator() {
-        return instance;
+        return get();
     }
-    
-    public AGeneratorManager getGeneratorManager() {
-        return instance.getGeneratorManager();
+
+    public static void set(ASuperiorGenerator api) {
+        SuperiorGeneratorAPI.api = api;
     }
 
 }

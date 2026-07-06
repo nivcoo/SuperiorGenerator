@@ -1,19 +1,17 @@
 package fr.nivcoo.superiorgenerator.manager;
 
 import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
-import fr.nivcoo.utilsz.config.Pair;
-import org.bukkit.Material;
+import fr.nivcoo.superiorgeneratorapi.manager.GeneratorBlock;
 
-import java.util.HashMap;
-import java.util.LinkedHashMap;
+import java.util.List;
 
 public class Generator implements AGenerator {
 
-    String id;
-    String category;
-    LinkedHashMap<Pair<Material, Byte>, Double> blocks;
+    private final String id;
+    private final String category;
+    private final List<GeneratorBlock> blocks;
 
-    public Generator(String id, String category, LinkedHashMap<Pair<Material, Byte>, Double> blocks) {
+    public Generator(String id, String category, List<GeneratorBlock> blocks) {
         this.id = id;
         this.category = category;
         this.blocks = blocks;
@@ -27,9 +25,7 @@ public class Generator implements AGenerator {
         return category;
     }
 
-    public HashMap<Pair<Material, Byte>, Double> getBlocks() {
+    public List<GeneratorBlock> getBlocks() {
         return blocks;
     }
-
-
 }

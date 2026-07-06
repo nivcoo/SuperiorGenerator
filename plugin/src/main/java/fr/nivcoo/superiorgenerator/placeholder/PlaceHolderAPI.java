@@ -3,7 +3,7 @@ package fr.nivcoo.superiorgenerator.placeholder;
 import com.bgsoftware.superiorskyblock.api.island.Island;
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
-import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
+import fr.nivcoo.superiorgenerator.hook.platform.SuperiorHook;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import me.clip.placeholderapi.expansion.PlaceholderExpansion;
@@ -14,7 +14,7 @@ import java.util.UUID;
 
 public class PlaceHolderAPI extends PlaceholderExpansion {
 
-    private SuperiorGenerator superiorGenerator;
+    private final SuperiorGenerator superiorGenerator;
 
     public PlaceHolderAPI() {
         superiorGenerator = SuperiorGenerator.get();
@@ -52,16 +52,16 @@ public class PlaceHolderAPI extends PlaceholderExpansion {
             return String.valueOf(cacheManager.getOrUpdateCurrentIslandGenerator(player).getID());
         } else if (identifier.equals("has_manage_permission")) {
 
-            Island island = SuperiorSkyblock2.getIslandByMember(player);
+            Island island = SuperiorHook.getIslandByMember(player);
             if (island == null)
                 return "false";
-            return String.valueOf(island.hasPermission(player, superiorGenerator.getSuperiorSkyblock2().getManageGeneratorPermission()));
+            return String.valueOf(island.hasPermission(player, SuperiorHook.getManageGeneratorPermission()));
         } else if (identifier.equals("get_current_category")) {
 
 
             return String.valueOf(cacheManager.getOrUpdateCurrentIslandGenerator(player).getCategory());
         } else if (identifier.startsWith("is_unlocked_")) {
-            UUID islandUUID = SuperiorSkyblock2.getIslandUUIDByMember(player);
+            UUID islandUUID = SuperiorHook.getIslandUUIDByMember(player);
 
             if (islandUUID == null)
                 return "false";
@@ -71,7 +71,7 @@ public class PlaceHolderAPI extends PlaceholderExpansion {
                 return "false";
             return String.valueOf(cacheManager.isAlreadyUnlocked(islandUUID, generator));
         } else if (identifier.startsWith("unlocked_categories_number_")) {
-            UUID islandUUID = SuperiorSkyblock2.getIslandUUIDByMember(player);
+            UUID islandUUID = SuperiorHook.getIslandUUIDByMember(player);
             if (islandUUID == null)
                 return "0";
             String category = identifier.replace("unlocked_categories_number_", "");

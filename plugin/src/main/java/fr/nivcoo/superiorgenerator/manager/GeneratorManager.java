@@ -1,34 +1,40 @@
 package fr.nivcoo.superiorgenerator.manager;
 
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
+import fr.nivcoo.superiorgenerator.config.GeneratorsConfig;
 import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import fr.nivcoo.superiorgeneratorapi.manager.AGeneratorManager;
-import fr.nivcoo.utilsz.config.Config;
-import fr.nivcoo.utilsz.config.Pair;
+import fr.nivcoo.superiorgeneratorapi.manager.GeneratorBlock;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 public class GeneratorManager implements AGeneratorManager {
 
-    private final Config config;
+    private static final GeneratorBlock FALLBACK = new GeneratorBlock(Material.COBBLESTONE, 100.0D);
+
+    private final GeneratorsConfig config;
 
     private List<AGenerator> generatorsList;
     private AGenerator defaultGenerator;
 
-    private static final Pair<Material, Byte> FALLBACK = new Pair<>(Material.COBBLESTONE, null);
-
     public GeneratorManager() {
         SuperiorGenerator superiorGenerator = SuperiorGenerator.get();
-        this.config = superiorGenerator.getConfiguration();
+        this.config = superiorGenerator.generators();
         loadGenerators();
         saveDefaultGenerator();
     }
 
     public void saveDefaultGenerator() {
         defaultGenerator = getGeneratorByID("default");
+        if (defaultGenerator == null) {
+            defaultGenerator = new Generator("default", "1", List.of(FALLBACK));
+            generatorsList.add(defaultGenerator);
+            Bukkit.getLogger().warning("[SuperiorGenerator] Missing default generator in generators.yml, using COBBLESTONE fallback.");
+        }
     }
 
     public AGenerator getDefaultGenerator() {
@@ -37,26 +43,24 @@ public class GeneratorManager implements AGeneratorManager {
 
     void loadGenerators() {
         generatorsList = new ArrayList<>();
-        List<String> generators = config.getKeys("generators");
 
-        for (String ID : generators) {
-            String path = "generators." + ID + ".";
-            String category = config.getString(path + "category");
+        for (var entry : config.generators.entrySet()) {
+            String id = entry.getKey();
+            GeneratorsConfig.GeneratorConfig generatorConfig = entry.getValue();
+            List<GeneratorBlock> blocks = new ArrayList<>();
 
-            List<String> blocksString = config.getStringList(path + "blocks");
-            LinkedHashMap<Pair<Material, Byte>, Double> blocks = new LinkedHashMap<>();
-
-            for (String blockString : blocksString) {
-                String[] split = blockString.split(":");
+            for (String blockString : generatorConfig.blocks) {
+                String[] split = blockString.split(":", 2);
                 if (split.length < 2) {
                     Bukkit.getLogger().warning("[SuperiorGenerator] Invalid block entry: " + blockString);
                     continue;
                 }
 
                 String materialString = split[0];
-                String[] splitData = materialString.split("!");
-                materialString = splitData[0];
-                Byte data = (splitData.length > 1) ? Byte.parseByte(splitData[1]) : null;
+                if (materialString.contains("!")) {
+                    Bukkit.getLogger().warning("[SuperiorGenerator] Legacy block data is no longer supported: " + blockString);
+                    continue;
+                }
 
                 Material material;
                 try {
@@ -64,7 +68,6 @@ public class GeneratorManager implements AGeneratorManager {
                 } catch (IllegalArgumentException e) {
                     Bukkit.getLogger().warning("[SuperiorGenerator] The material '" + materialString + "' doesn't exist, please check your config!");
                     material = Material.COBBLESTONE;
-                    data = null;
                 }
 
                 double weight;
@@ -75,34 +78,34 @@ public class GeneratorManager implements AGeneratorManager {
                     continue;
                 }
 
-                blocks.put(new Pair<>(material, data), weight);
+                blocks.add(new GeneratorBlock(material, weight));
             }
 
-            generatorsList.add(new Generator(ID, category, blocks));
+            generatorsList.add(new Generator(id, generatorConfig.category, blocks));
         }
     }
 
-    public AGenerator getGeneratorByID(String ID) {
+    public AGenerator getGeneratorByID(String id) {
         return generatorsList.stream()
-                .filter(generator -> generator.getID().equalsIgnoreCase(ID))
+                .filter(generator -> generator.getID().equalsIgnoreCase(id))
                 .findAny()
                 .orElse(null);
     }
 
-    public Pair<Material, Byte> getRandomBlock(AGenerator generator) {
-        Map<Pair<Material, Byte>, Double> map = generator.getBlocks();
-        if (map.isEmpty()) return FALLBACK;
+    public GeneratorBlock getRandomBlock(AGenerator generator) {
+        List<GeneratorBlock> blocks = generator.getBlocks();
+        if (blocks.isEmpty()) return FALLBACK;
 
         double total = 0.0D;
-        for (double w : map.values()) total += Math.max(0D, w);
+        for (GeneratorBlock block : blocks) total += Math.max(0D, block.weight());
         if (total <= 0.0D) return FALLBACK;
 
         double r = ThreadLocalRandom.current().nextDouble(total);
         double acc = 0.0D;
 
-        for (Map.Entry<Pair<Material, Byte>, Double> entry : map.entrySet()) {
-            acc += Math.max(0D, entry.getValue());
-            if (r < acc) return entry.getKey();
+        for (GeneratorBlock block : blocks) {
+            acc += Math.max(0D, block.weight());
+            if (r < acc) return block;
         }
 
         return FALLBACK;

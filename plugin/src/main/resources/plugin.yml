@@ -1,9 +1,9 @@
 name: SuperiorGenerator
 version: 1.0.2
-api-version: 1.20
+api-version: 26.1.2
 author: nivcoo
 main: fr.nivcoo.superiorgenerator.SuperiorGenerator
-loadbefore: [ SuperiorSkyblock2 ]
+depend: [ SuperiorSkyblock2 ]
 softdepend: [ PlaceholderAPI ]
 commands:
   generator:

@@ -1,9 +1,6 @@
 package fr.nivcoo.superiorgeneratorapi.manager;
 
-import fr.nivcoo.utilsz.config.Pair;
-import org.bukkit.Material;
-
-import java.util.HashMap;
+import java.util.List;
 
 public interface AGenerator {
 
@@ -11,5 +8,5 @@ public interface AGenerator {
 
     String getCategory();
 
-    HashMap<Pair<Material, Byte>, Double> getBlocks();
+    List<GeneratorBlock> getBlocks();
 }

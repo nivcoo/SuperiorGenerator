@@ -1,11 +1,11 @@
 package fr.nivcoo.superiorgenerator.cache;
 
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
-import fr.nivcoo.superiorgenerator.actions.SelectAction;
-import fr.nivcoo.superiorgenerator.actions.UnlockAction;
-import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
+import fr.nivcoo.superiorgenerator.hook.platform.SuperiorHook;
+import fr.nivcoo.superiorgenerator.messaging.action.SelectAction;
+import fr.nivcoo.superiorgenerator.messaging.action.UnlockAction;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
-import fr.nivcoo.superiorgenerator.utils.Database;
+import fr.nivcoo.superiorgenerator.storage.Database;
 import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
@@ -81,7 +81,7 @@ public class CacheManager implements Listener {
     }
 
     private AGenerator getOrUpdateCurrentIslandGenerator(Player p, boolean forceUpdate) {
-        return getOrUpdateCurrentIslandGenerator(SuperiorSkyblock2.getIslandUUIDByMember(p), forceUpdate);
+        return getOrUpdateCurrentIslandGenerator(SuperiorHook.getIslandUUIDByMember(p), forceUpdate);
     }
 
     public AGenerator getOrUpdateCurrentIslandGenerator(UUID islandUUID) {
@@ -114,7 +114,7 @@ public class CacheManager implements Listener {
         if (gen == generator) return false;
         activeGenerators.put(islandUUID, generator);
         database.updateActiveGen(islandUUID, generator.getID());
-        superiorGenerator.getRedisBus().publish(new SelectAction(islandUUID, generator.getID()));
+        superiorGenerator.getMessageBus().publish(new SelectAction(islandUUID, generator.getID()));
         return true;
     }
 
@@ -130,7 +130,7 @@ public class CacheManager implements Listener {
         unlockedGenerators.put(islandUUID, unlockedGenerator);
 
         database.addOrEditUnlockedGenerator(islandUUID, generator.getID());
-        superiorGenerator.getRedisBus().publish(new UnlockAction(islandUUID, generator.getID()));
+        superiorGenerator.getMessageBus().publish(new UnlockAction(islandUUID, generator.getID()));
         return true;
     }
 

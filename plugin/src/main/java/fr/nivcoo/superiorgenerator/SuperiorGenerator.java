@@ -1,74 +1,58 @@
 package fr.nivcoo.superiorgenerator;
 
-import fr.nivcoo.superiorgenerator.actions.SelectAction;
-import fr.nivcoo.superiorgenerator.actions.UnlockAction;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
-import fr.nivcoo.superiorgenerator.command.commands.SelectCMD;
-import fr.nivcoo.superiorgenerator.command.commands.UnlockCMD;
-import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
+import fr.nivcoo.superiorgenerator.command.SelectCommand;
+import fr.nivcoo.superiorgenerator.command.UnlockCommand;
+import fr.nivcoo.superiorgenerator.config.GeneratorsConfig;
+import fr.nivcoo.superiorgenerator.config.MainConfig;
+import fr.nivcoo.superiorgenerator.config.MessagesConfig;
+import fr.nivcoo.superiorgenerator.hook.core.HookContext;
+import fr.nivcoo.superiorgenerator.hook.platform.SuperiorHook;
 import fr.nivcoo.superiorgenerator.listener.BlockListener;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
+import fr.nivcoo.superiorgenerator.messaging.action.SelectAction;
+import fr.nivcoo.superiorgenerator.messaging.action.UnlockAction;
 import fr.nivcoo.superiorgenerator.placeholder.PlaceHolderAPI;
-import fr.nivcoo.superiorgenerator.utils.Database;
+import fr.nivcoo.superiorgenerator.storage.Database;
 import fr.nivcoo.superiorgeneratorapi.ASuperiorGenerator;
 import fr.nivcoo.superiorgeneratorapi.SuperiorGeneratorAPI;
-import fr.nivcoo.utilsz.commands.CommandManager;
-import fr.nivcoo.utilsz.config.Config;
-import fr.nivcoo.utilsz.database.DatabaseManager;
-import fr.nivcoo.utilsz.database.DatabaseType;
-import fr.nivcoo.utilsz.redis.RedisManager;
-import fr.nivcoo.utilsz.redis.bus.RedisChannelBus;
-import fr.nivcoo.utilsz.redis.bus.RedisChannelBusImpl;
-import fr.nivcoo.utilsz.redis.bus.RedisChannelBusNoop;
+import fr.nivcoo.utilsz.core.commands.CommandManager;
+import fr.nivcoo.utilsz.core.commands.CommandsConfigProvider;
+import fr.nivcoo.utilsz.core.commands.SimpleCommandsConfig;
+import fr.nivcoo.utilsz.core.config.ConfigManager;
+import fr.nivcoo.utilsz.core.database.DatabaseManager;
+import fr.nivcoo.utilsz.core.messaging.MessageBus;
+import fr.nivcoo.utilsz.platform.bukkit.commands.BukkitCommandRegistrar;
+import fr.nivcoo.utilsz.platform.bukkit.hook.BukkitHook;
+import fr.nivcoo.utilsz.platform.bukkit.hook.BukkitHookRegistry;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
-import java.io.File;
-import java.lang.reflect.Field;
 import java.sql.SQLException;
-import java.util.logging.Logger;
+import java.util.List;
+import java.util.function.Function;
 
 public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator {
 
     private static SuperiorGenerator INSTANCE;
-    private Config config;
 
+    private MainConfig config;
+    private MessagesConfig messages;
+    private GeneratorsConfig generators;
     private DatabaseManager databaseManager;
     private Database database;
-
-    private SuperiorSkyblock2 superiorSkyblock2;
+    private HookContext hookContext;
     private GeneratorManager generatorManager;
     private CacheManager cacheManager;
-    private RedisManager redisManager;
-    private final Logger log = getLogger();
-
-    private RedisChannelBus redisBus;
+    private MessageBus messageBus;
 
     @Override
     public void onEnable() {
         INSTANCE = this;
-        loadAPI();
-        config = new Config(loadFile("config.yml"));
+        SuperiorGeneratorAPI.set(this);
 
-        String type = config.getString("database.type", "sqlite").toLowerCase();
-        DatabaseType dbType = switch (type) {
-            case "mysql" -> DatabaseType.MYSQL;
-            case "mariadb" -> DatabaseType.MARIADB;
-            default -> DatabaseType.SQLITE;
-        };
-
-        String sqlitePath = new File(getDataFolder(), config.getString("database.sqlite.path", "database.db")).getPath();
-
-        databaseManager = new DatabaseManager(
-                dbType,
-                config.getString("database.mysql.host"),
-                config.getInt("database.mysql.port"),
-                config.getString("database.mysql.database"),
-                config.getString("database.mysql.username"),
-                config.getString("database.mysql.password"),
-                sqlitePath
-        );
-
+        loadConfigs();
+        databaseManager = config.database.createManager(getDataFolder());
         database = new Database(databaseManager);
 
         try {
@@ -77,8 +61,7 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
             getLogger().warning("SuperiorGenerator: table init error: " + e.getMessage());
         }
 
-        superiorSkyblock2 = new SuperiorSkyblock2();
-        Bukkit.getPluginManager().registerEvents(superiorSkyblock2, this);
+        setupHooks();
 
         generatorManager = new GeneratorManager();
         cacheManager = new CacheManager();
@@ -90,67 +73,66 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
         Bukkit.getPluginManager().registerEvents(cacheManager, this);
         Bukkit.getPluginManager().registerEvents(new BlockListener(), this);
 
-        CommandManager commandManager = new CommandManager(this, config, "generator", "superiorgenerator.commands");
-        commandManager.addCommand(new UnlockCMD());
-        commandManager.addCommand(new SelectCMD());
+        CommandsConfigProvider provider = new SimpleCommandsConfig(
+                messages.commands.noPermission,
+                messages.commands.incorrectUsage,
+                messages.commands.help
+        );
+        CommandManager commandManager = new CommandManager(
+                new BukkitCommandRegistrar(this),
+                provider,
+                "generator",
+                "superiorgenerator.commands"
+        );
+        commandManager.addCommand(new UnlockCommand());
+        commandManager.addCommand(new SelectCommand());
 
-        if (config.getBoolean("redis.enabled")) {
-            redisManager = new RedisManager(
-                    this,
-                    config.getString("redis.host"),
-                    config.getInt("redis.port"),
-                    config.getString("redis.username"),
-                    config.getString("redis.password")
-            );
+        messageBus = config.messaging.createBus(runnable -> Bukkit.getScheduler().runTask(this, runnable), getSLF4JLogger());
+        messageBus.register(SelectAction.class);
+        messageBus.register(UnlockAction.class);
+        messageBus.start();
+    }
 
-            redisBus = new RedisChannelBusImpl(redisManager, "edendonjon");
+    private void setupHooks() {
+        hookContext = new HookContext(this);
+        new BukkitHookRegistry<>(List.<Function<HookContext, BukkitHook<HookContext>>>of(
+                SuperiorHook::new
+        )).loadAll(hookContext);
+    }
 
-            redisBus.register(SelectAction.class);
-            redisBus.register(UnlockAction.class);
-
-            getLogger().info("Redis activé et connecté à " + config.getString("redis.host") + ":" + config.getInt("redis.port"));
-        } else {
-            redisBus = new RedisChannelBusNoop();
-            getLogger().info("Redis désactivé dans la configuration.");
-        }
+    private void loadConfigs() {
+        ConfigManager cm = new ConfigManager(getDataFolder());
+        config = cm.load("config.yml", MainConfig.class);
+        messages = cm.load("messages.yml", MessagesConfig.class);
+        generators = cm.load("generators.yml", GeneratorsConfig.class);
     }
 
     @Override
     public void onDisable() {
-        if (redisBus != null) redisBus.close();
-        if (redisManager != null) redisManager.close();
+        SuperiorGeneratorAPI.set(null);
+        if (hookContext != null) hookContext.cancelTasks();
+        if (messageBus != null) messageBus.close();
         if (databaseManager != null) databaseManager.closeConnection();
     }
 
-    private void loadAPI() {
-        try {
-            Field instance = SuperiorGeneratorAPI.class.getDeclaredField("instance");
-            instance.setAccessible(true);
-            instance.set(null, this);
-        } catch (Exception ex) {
-            ex.printStackTrace();
-        }
-    }
-
-    public Config getConfiguration() {
+    public MainConfig getConfiguration() {
         return config;
     }
 
-    private File loadFile(String path) {
-        File configFile = new File(getDataFolder(), path);
-        if (!configFile.exists()) {
-            configFile.getParentFile().mkdirs();
-            saveResource(path, false);
-        }
-        return configFile;
+    public MainConfig cfg() {
+        return config;
+    }
+
+    public MessagesConfig messages() {
+        return messages;
+    }
+
+    public GeneratorsConfig generators() {
+        return generators;
     }
 
     public Database getDatabase() {
         return database;
-    }
-
-    public SuperiorSkyblock2 getSuperiorSkyblock2() {
-        return superiorSkyblock2;
     }
 
     public GeneratorManager getGeneratorManager() {
@@ -161,11 +143,11 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
         return cacheManager;
     }
 
-    public static SuperiorGenerator get() {
-        return INSTANCE;
+    public MessageBus getMessageBus() {
+        return messageBus;
     }
 
-    public RedisChannelBus getRedisBus() {
-        return redisBus;
+    public static SuperiorGenerator get() {
+        return INSTANCE;
     }
 }

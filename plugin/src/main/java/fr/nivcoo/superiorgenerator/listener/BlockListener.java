@@ -2,12 +2,10 @@ package fr.nivcoo.superiorgenerator.listener;
 
 import fr.nivcoo.superiorgenerator.SuperiorGenerator;
 import fr.nivcoo.superiorgenerator.cache.CacheManager;
-import fr.nivcoo.superiorgenerator.hook.superiorskyblock.SuperiorSkyblock2;
+import fr.nivcoo.superiorgenerator.hook.platform.SuperiorHook;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
 import fr.nivcoo.superiorgeneratorapi.manager.AGenerator;
-import fr.nivcoo.utilsz.config.Config;
-import fr.nivcoo.utilsz.config.Pair;
-import fr.nivcoo.utilsz.version.ServerVersion;
+import fr.nivcoo.superiorgeneratorapi.manager.GeneratorBlock;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -20,53 +18,40 @@ import java.util.UUID;
 
 public class BlockListener implements Listener {
 
-
-    private SuperiorGenerator superiorGenerator;
-    private final Config config;
+    private final SuperiorGenerator superiorGenerator;
     private final CacheManager cacheManager;
     private final GeneratorManager generatorManager;
 
     public BlockListener() {
         superiorGenerator = SuperiorGenerator.get();
-
-        config = superiorGenerator.getConfiguration();
-
         cacheManager = superiorGenerator.getCacheManager();
         generatorManager = superiorGenerator.getGeneratorManager();
-
     }
 
-
     private void generateRandomBlock(BlockState newState, UUID islandUUID) {
-
         AGenerator generator = cacheManager.getOrUpdateCurrentIslandGenerator(islandUUID);
+        GeneratorBlock selectedBlock = generatorManager.getRandomBlock(generator);
 
-        Pair<Material, Byte> selectedBlock = generatorManager.getRandomBlock(generator);
-
-        newState.setType(selectedBlock.getFirst());
-        if (selectedBlock.getSecond() != null)
-            newState.setRawData(selectedBlock.getSecond());
+        newState.setType(selectedBlock.material());
         newState.update(true);
-        SuperiorSkyblock2.addBlockInIsland(newState.getBlock());
-
+        SuperiorHook.addBlockInIsland(newState.getBlock());
     }
 
     @EventHandler
     public void onBlockFormEvent(BlockFormEvent event) {
-        UUID islandUUID = SuperiorSkyblock2.getIslandUUIDByLocation(event.getNewState().getLocation());
-        if (islandUUID == null)
-            return;
+        UUID islandUUID = SuperiorHook.getIslandUUIDByLocation(event.getNewState().getLocation());
+        if (islandUUID == null) return;
 
-        boolean enableBasaltGen = config.getBoolean("enable_basalt_generator");
-        if ((ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13) && event.getNewState().getType() == Material.getMaterial("LAVA")) || event.getNewState().getType() == Material.getMaterial("STATIONARY_LAVA")) {
+        boolean enableBasaltGen = superiorGenerator.getConfiguration().enableBasaltGenerator;
+        if (event.getNewState().getType() == Material.LAVA) {
             event.setCancelled(true);
             Block relBlock = event.getBlock().getRelative(BlockFace.DOWN);
-            if ((ServerVersion.isServerVersionAtLeast(ServerVersion.V1_13) && relBlock.getType() == Material.getMaterial("WATER")) || relBlock.getType() == Material.getMaterial("STATIONARY_WATER"))
+            if (relBlock.getType() == Material.WATER) {
                 generateRandomBlock(relBlock.getState(), islandUUID);
-        } else if (event.getNewState().getType() == Material.COBBLESTONE ||
-                (ServerVersion.isServerVersionAtLeast(ServerVersion.V1_16) && event.getNewState().getType() == Material.getMaterial("BASALT") && enableBasaltGen))
+            }
+        } else if (event.getNewState().getType() == Material.COBBLESTONE
+                || (event.getNewState().getType() == Material.BASALT && enableBasaltGen)) {
             generateRandomBlock(event.getNewState(), islandUUID);
-
+        }
     }
-
 }
