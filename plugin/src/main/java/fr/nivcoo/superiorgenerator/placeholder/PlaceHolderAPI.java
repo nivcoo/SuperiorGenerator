@@ -62,7 +62,7 @@ public class PlaceHolderAPI extends PlaceholderExpansion {
         } else if (identifier.startsWith("is_unlocked_")) {
             UUID islandUUID = superiorGenerator.islands()
                     .islandByMember(player)
-                    .map(island -> island.uuid())
+                    .map(IslandService.IslandInfo::uuid)
                     .orElse(null);
 
             if (islandUUID == null)
@@ -75,7 +75,7 @@ public class PlaceHolderAPI extends PlaceholderExpansion {
         } else if (identifier.startsWith("unlocked_categories_number_")) {
             UUID islandUUID = superiorGenerator.islands()
                     .islandByMember(player)
-                    .map(island -> island.uuid())
+                    .map(IslandService.IslandInfo::uuid)
                     .orElse(null);
             if (islandUUID == null)
                 return "0";
