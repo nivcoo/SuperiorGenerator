@@ -14,7 +14,7 @@ public record UnlockedGeneratorModel(UUID islandUuid, String generatorId) {
         public ModelSchema<UnlockedGeneratorModel> schema() {
             return ModelSchema.<UnlockedGeneratorModel>of("unlocked_generator")
                     .column("island_uuid", ColumnType.UUID, UnlockedGeneratorModel::islandUuid)
-                    .column("generator_id", ColumnType.TEXT, UnlockedGeneratorModel::generatorId)
+                    .column("generator_id", ColumnType.STRING, 128, UnlockedGeneratorModel::generatorId)
                     .constraint("PRIMARY KEY (island_uuid, generator_id)")
                     .index("idx_unlocked_generator_island", "island_uuid");
         }

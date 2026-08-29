@@ -14,7 +14,7 @@ public record ActiveGeneratorModel(UUID islandUuid, String generatorId) {
         public ModelSchema<ActiveGeneratorModel> schema() {
             return ModelSchema.<ActiveGeneratorModel>of("active_generator")
                     .column("island_uuid", ColumnType.UUID, "PRIMARY KEY", ActiveGeneratorModel::islandUuid)
-                    .column("generator_id", ColumnType.TEXT, ActiveGeneratorModel::generatorId);
+                    .column("generator_id", ColumnType.STRING, 128, ActiveGeneratorModel::generatorId);
         }
 
         @Override

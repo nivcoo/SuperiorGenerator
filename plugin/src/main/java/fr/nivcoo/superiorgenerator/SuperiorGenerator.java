@@ -60,7 +60,7 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
         try {
             database.initDB();
         } catch (SQLException e) {
-            getLogger().warning("SuperiorGenerator: table init error: " + e.getMessage());
+            throw new RuntimeException("Unable to initialize SuperiorGenerator database tables", e);
         }
 
         islandService = new IslandService();
