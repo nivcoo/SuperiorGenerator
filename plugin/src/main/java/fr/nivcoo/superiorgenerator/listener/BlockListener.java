@@ -42,10 +42,12 @@ public class BlockListener implements Listener {
     private void generateRandomBlock(BlockState newState, UUID islandUUID) {
         AGenerator generator = cacheManager.getCurrentIslandGenerator(islandUUID);
         GeneratorBlock selectedBlock = generatorManager.getRandomBlock(generator);
+        Material previousType = newState.getBlock().getType();
 
         newState.setType(selectedBlock.material());
-        newState.update(true);
-        superiorGenerator.islands().handleBlockPlace(newState.getBlock());
+        if (!newState.update(true)) return;
+        Block block = newState.getBlock();
+        superiorGenerator.blockChanges().recordChange(block, previousType);
     }
 
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
@@ -57,7 +59,7 @@ public class BlockListener implements Listener {
 
         UUID islandUUID = superiorGenerator.islands()
                 .islandAt(target.getLocation())
-                .map(island -> island.uuid())
+                .map(IslandService.IslandInfo::uuid)
                 .orElse(null);
         if (islandUUID == null) return;
 
@@ -81,6 +83,7 @@ public class BlockListener implements Listener {
                 generateRandomBlock(relBlock.getState(), islandUUID);
             }
         } else if (event.getNewState().getType() == Material.BASALT && enableBasaltGen) {
+            event.setCancelled(true);
             generateRandomBlock(event.getNewState(), islandUUID);
         }
     }

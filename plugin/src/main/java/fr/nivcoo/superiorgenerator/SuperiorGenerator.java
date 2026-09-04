@@ -7,6 +7,7 @@ import fr.nivcoo.superiorgenerator.config.GeneratorsConfig;
 import fr.nivcoo.superiorgenerator.config.MainConfig;
 import fr.nivcoo.superiorgenerator.config.MessagesConfig;
 import fr.nivcoo.superiorgenerator.hook.core.HookContext;
+import fr.nivcoo.superiorgenerator.hook.integration.InsightsHook;
 import fr.nivcoo.superiorgenerator.hook.platform.SuperiorHook;
 import fr.nivcoo.superiorgenerator.listener.BlockListener;
 import fr.nivcoo.superiorgenerator.manager.GeneratorManager;
@@ -26,6 +27,7 @@ import fr.nivcoo.utilsz.core.messaging.MessageBus;
 import fr.nivcoo.utilsz.platform.bukkit.commands.BukkitCommandRegistrar;
 import fr.nivcoo.utilsz.platform.bukkit.hook.BukkitHook;
 import fr.nivcoo.utilsz.platform.bukkit.hook.BukkitHookRegistry;
+import fr.nivcoo.utilsz.platform.bukkit.tracking.BlockChangeService;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.java.JavaPlugin;
 
@@ -44,6 +46,7 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
     private Database database;
     private HookContext hookContext;
     private IslandService islandService;
+    private BlockChangeService blockChangeService;
     private GeneratorManager generatorManager;
     private CacheManager cacheManager;
     private MessageBus messageBus;
@@ -64,6 +67,7 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
         }
 
         islandService = new IslandService();
+        blockChangeService = new BlockChangeService(this);
         setupHooks();
 
         generatorManager = new GeneratorManager();
@@ -99,7 +103,8 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
     private void setupHooks() {
         hookContext = new HookContext(this);
         new BukkitHookRegistry<>(List.<Function<HookContext, BukkitHook<HookContext>>>of(
-                SuperiorHook::new
+                SuperiorHook::new,
+                InsightsHook::new
         )).loadAll(hookContext);
     }
 
@@ -152,6 +157,10 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
 
     public IslandService islands() {
         return islandService;
+    }
+
+    public BlockChangeService blockChanges() {
+        return blockChangeService;
     }
 
     public static SuperiorGenerator get() {

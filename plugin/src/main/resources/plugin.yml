@@ -4,7 +4,7 @@ api-version: 26.1.2
 author: nivcoo
 main: fr.nivcoo.superiorgenerator.SuperiorGenerator
 depend: [ SuperiorSkyblock2 ]
-softdepend: [ PlaceholderAPI ]
+softdepend: [ PlaceholderAPI, Insights ]
 commands:
   generator:
     description: Generator Command

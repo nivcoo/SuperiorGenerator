@@ -1,7 +1,6 @@
 package fr.nivcoo.superiorgenerator.service;
 
 import org.bukkit.Location;
-import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 
 import java.util.Optional;
@@ -31,10 +30,6 @@ public final class IslandService {
         return resolver.hasPermission(player, islandUuid, permission);
     }
 
-    public void handleBlockPlace(Block block) {
-        resolver.handleBlockPlace(block);
-    }
-
     public interface IslandResolver {
         default Optional<IslandInfo> islandAt(Location location) {
             return Optional.empty();
@@ -48,8 +43,6 @@ public final class IslandService {
             return false;
         }
 
-        default void handleBlockPlace(Block block) {
-        }
     }
 
     public record IslandInfo(UUID uuid, boolean spawn) {
