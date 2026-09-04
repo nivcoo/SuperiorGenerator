@@ -63,7 +63,9 @@ public final class SuperiorHook extends ListenerBukkitHook<HookContext> {
             public void handleBlockPlace(Block block) {
                 if (block == null) return;
                 Island island = SuperiorSkyblockAPI.getIslandAt(block.getLocation());
-                if (island != null) island.handleBlockPlace(block);
+                if (island == null) return;
+                island.handleBlockPlace(block);
+                island.markChunkDirty(block.getWorld(), block.getX() >> 4, block.getZ() >> 4, true);
             }
         });
     }
