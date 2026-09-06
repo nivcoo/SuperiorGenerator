@@ -11,6 +11,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.logging.Level;
 
@@ -79,6 +80,32 @@ public class Database {
             log("loadUnlockedGenerators", e);
             return Map.of();
         }
+    }
+
+    public Optional<IslandGenerators> loadIsland(UUID islandUuid) {
+        try {
+            String active = activeGenerators.find()
+                    .where("island_uuid", islandUuid)
+                    .limit(1)
+                    .all()
+                    .stream()
+                    .findFirst()
+                    .map(ActiveGeneratorModel::generatorId)
+                    .orElse(null);
+            List<String> unlocked = unlockedGenerators.find()
+                    .where("island_uuid", islandUuid)
+                    .all()
+                    .stream()
+                    .map(UnlockedGeneratorModel::generatorId)
+                    .toList();
+            return Optional.of(new IslandGenerators(active, unlocked));
+        } catch (SQLException e) {
+            log("loadIsland", e);
+            return Optional.empty();
+        }
+    }
+
+    public record IslandGenerators(String activeGeneratorId, List<String> unlockedGeneratorIds) {
     }
 
     private void log(String action, SQLException e) {

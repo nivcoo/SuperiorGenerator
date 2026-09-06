@@ -9,7 +9,7 @@ import fr.nivcoo.utilsz.core.messaging.BusMessage;
 
 import java.util.UUID;
 
-@BusAction("select")
+@BusAction(value = "select", runOnMainThread = true)
 public record SelectAction(UUID islandUUID, String generatorID) implements BusMessage {
 
     @Override

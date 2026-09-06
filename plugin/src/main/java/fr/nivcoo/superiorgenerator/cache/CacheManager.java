@@ -12,12 +12,17 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerJoinEvent;
+import org.bukkit.scheduler.BukkitTask;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class CacheManager implements Listener {
@@ -28,6 +33,10 @@ public class CacheManager implements Listener {
 
     HashMap<UUID, List<AGenerator>> unlockedGenerators;
     HashMap<UUID, AGenerator> activeGenerators;
+    HashMap<UUID, Long> revisions;
+    private final Set<UUID> refreshing = ConcurrentHashMap.newKeySet();
+    private final BukkitTask reconciliationTask;
+    private volatile boolean closed;
 
 
     public CacheManager() {
@@ -36,7 +45,10 @@ public class CacheManager implements Listener {
         generatorManager = superiorGenerator.getGeneratorManager();
         unlockedGenerators = new HashMap<>();
         activeGenerators = new HashMap<>();
+        revisions = new HashMap<>();
         load();
+        reconciliationTask = Bukkit.getScheduler().runTaskTimer(
+                superiorGenerator, this::refreshOnlineIslands, 600L, 600L);
     }
 
     public void load() {
@@ -66,6 +78,7 @@ public class CacheManager implements Listener {
         if (islandUUID == null) return;
         if (generator == null) return;
         activeGenerators.put(islandUUID, generator);
+        touch(islandUUID);
     }
 
     public void forceUnlockGenerator(UUID islandUUID, AGenerator generator) {
@@ -78,6 +91,7 @@ public class CacheManager implements Listener {
             unlocked.add(generator);
         }
         activeGenerators.put(islandUUID, generator);
+        touch(islandUUID);
     }
 
     public AGenerator getCurrentIslandGenerator(Player p) {
@@ -100,6 +114,7 @@ public class CacheManager implements Listener {
         if (!database.saveActiveGenerator(islandUUID, generator.getID())) return false;
 
         activeGenerators.put(islandUUID, generator);
+        touch(islandUUID);
         superiorGenerator.getMessageBus().publish(new SelectAction(islandUUID, generator.getID()));
         return true;
     }
@@ -116,6 +131,7 @@ public class CacheManager implements Listener {
         unlockedGenerator.add(generator);
         unlockedGenerators.put(islandUUID, unlockedGenerator);
         activeGenerators.put(islandUUID, generator);
+        touch(islandUUID);
 
         superiorGenerator.getMessageBus().publish(new UnlockAction(islandUUID, generator.getID()));
         return true;
@@ -125,9 +141,66 @@ public class CacheManager implements Listener {
     @EventHandler
     public void onPlayerJoin(PlayerJoinEvent e) {
         Player p = e.getPlayer();
+        superiorGenerator.islands().islandByMember(p)
+                .map(IslandService.IslandInfo::uuid)
+                .ifPresent(this::refreshIsland);
+    }
 
-        getCurrentIslandGenerator(p);
+    private void refreshIsland(UUID islandUuid) {
+        if (closed || !refreshing.add(islandUuid)) return;
+        long revision = revisions.getOrDefault(islandUuid, 0L);
+        Bukkit.getScheduler().runTaskAsynchronously(superiorGenerator, () -> {
+            Optional<Database.IslandGenerators> loaded = database.loadIsland(islandUuid);
+            if (closed || !superiorGenerator.isEnabled()) {
+                refreshing.remove(islandUuid);
+                return;
+            }
+            Bukkit.getScheduler().runTask(superiorGenerator, () -> {
+                try {
+                    loaded.ifPresent(snapshot -> applySnapshot(islandUuid, revision, snapshot));
+                } finally {
+                    refreshing.remove(islandUuid);
+                }
+            });
+        });
+    }
 
+    private void applySnapshot(UUID islandUuid, long revision, Database.IslandGenerators snapshot) {
+        if (revisions.getOrDefault(islandUuid, 0L) != revision) return;
+
+        List<AGenerator> unlocked = snapshot.unlockedGeneratorIds().stream()
+                .map(generatorManager::getGeneratorByID)
+                .filter(java.util.Objects::nonNull)
+                .collect(Collectors.toCollection(ArrayList::new));
+        if (unlocked.isEmpty()) unlockedGenerators.remove(islandUuid);
+        else unlockedGenerators.put(islandUuid, unlocked);
+
+        AGenerator active = snapshot.activeGeneratorId() == null
+                ? null
+                : generatorManager.getGeneratorByID(snapshot.activeGeneratorId());
+        if (active == null) activeGenerators.remove(islandUuid);
+        else activeGenerators.put(islandUuid, active);
+        touch(islandUuid);
+    }
+
+    private void touch(UUID islandUuid) {
+        revisions.merge(islandUuid, 1L, Long::sum);
+    }
+
+    private void refreshOnlineIslands() {
+        Set<UUID> islands = new HashSet<>();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            superiorGenerator.islands().islandByMember(player)
+                    .map(IslandService.IslandInfo::uuid)
+                    .ifPresent(islands::add);
+        }
+        islands.forEach(this::refreshIsland);
+    }
+
+    public void close() {
+        closed = true;
+        reconciliationTask.cancel();
+        refreshing.clear();
     }
 
     public boolean isAlreadyUnlocked(UUID islandUUID, AGenerator generator) {

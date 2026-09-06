@@ -118,6 +118,7 @@ public class SuperiorGenerator extends JavaPlugin implements ASuperiorGenerator 
     @Override
     public void onDisable() {
         SuperiorGeneratorAPI.set(null);
+        if (cacheManager != null) cacheManager.close();
         if (hookContext != null) hookContext.cancelTasks();
         if (messageBus != null) messageBus.close();
         if (databaseManager != null) databaseManager.closeConnection();

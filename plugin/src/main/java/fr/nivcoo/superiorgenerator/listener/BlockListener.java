@@ -55,7 +55,11 @@ public class BlockListener implements Listener {
         if (event.getBlock().getType() != Material.LAVA) return;
 
         Block target = event.getToBlock();
-        if (target.getType().isSolid() || !isGeneratorTarget(target)) return;
+        if (target.getType().isSolid()) return;
+
+        boolean stoneGenerator = event.getFace() == BlockFace.DOWN && target.getType() == Material.WATER;
+        if (stoneGenerator && !superiorGenerator.getConfiguration().enableStoneGenerator) return;
+        if (!stoneGenerator && !isGeneratorTarget(target)) return;
 
         UUID islandUUID = superiorGenerator.islands()
                 .islandAt(target.getLocation())
@@ -75,14 +79,18 @@ public class BlockListener implements Listener {
                 .orElse(null);
         if (islandUUID == null) return;
 
+        Material generatedType = event.getNewState().getType();
         boolean enableBasaltGen = superiorGenerator.getConfiguration().enableBasaltGenerator;
-        if (event.getNewState().getType() == Material.LAVA) {
+        boolean enableStoneGen = superiorGenerator.getConfiguration().enableStoneGenerator;
+        if (generatedType == Material.LAVA && enableStoneGen) {
             event.setCancelled(true);
             Block relBlock = event.getBlock().getRelative(BlockFace.DOWN);
             if (relBlock.getType() == Material.WATER) {
                 generateRandomBlock(relBlock.getState(), islandUUID);
             }
-        } else if (event.getNewState().getType() == Material.BASALT && enableBasaltGen) {
+        } else if (generatedType == Material.COBBLESTONE
+                || (generatedType == Material.STONE && enableStoneGen)
+                || (generatedType == Material.BASALT && enableBasaltGen)) {
             event.setCancelled(true);
             generateRandomBlock(event.getNewState(), islandUUID);
         }

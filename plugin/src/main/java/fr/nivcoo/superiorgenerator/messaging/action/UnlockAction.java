@@ -9,7 +9,7 @@ import fr.nivcoo.utilsz.core.messaging.BusMessage;
 
 import java.util.UUID;
 
-@BusAction("unlock")
+@BusAction(value = "unlock", runOnMainThread = true)
 public record UnlockAction(UUID islandUUID, String generatorID) implements BusMessage {
 
     @Override
